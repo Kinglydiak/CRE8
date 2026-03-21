@@ -1,0 +1,269 @@
+/* ── Wallet Page ─────────────────────────────────────────────── */
+.wallet-page {
+  min-height: 100vh;
+  padding: 40px 0;
+  background: #f9fafb;
+}
+
+.wallet-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 24px;
+}
+
+/* Balance Card */
+.wallet-balance-card {
+  background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+}
+
+.balance-label {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.balance-amount {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+.balance-currency {
+  font-size: 20px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.balance-note {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 8px;
+}
+
+.btn-withdraw {
+  background: white;
+  color: #065f46;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-withdraw:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-withdraw:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tabs */
+.wallet-tabs {
+  display: flex;
+  gap: 4px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+
+.wallet-tab {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.wallet-tab.active {
+  background: white;
+  color: #111827;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* Transaction List */
+.wallet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wallet-empty {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  border: 1px dashed #d1d5db;
+}
+
+.wallet-tx-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #f3f4f6;
+}
+
+.tx-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tx-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tx-in {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.tx-out {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.tx-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+  margin: 0 0 2px;
+}
+
+.tx-sub {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 2px;
+}
+
+.tx-date {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.tx-ref {
+  font-size: 11px;
+  color: #9ca3af;
+  font-family: monospace;
+  margin: 2px 0 0;
+}
+
+.tx-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.tx-amount {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.tx-amount-in {
+  color: #065f46;
+}
+
+.tx-amount-out {
+  color: #dc2626;
+}
+
+/* Status Badges */
+.wallet-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-yellow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-blue {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-green {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-red {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Withdraw Modal */
+.withdraw-modal {
+  max-width: 420px;
+}
+
+.withdraw-balance-info {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #065f46;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .wallet-balance-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .btn-withdraw {
+    width: 100%;
+    text-align: center;
+  }
+
+  .balance-amount {
+    font-size: 32px;
+  }
+}
