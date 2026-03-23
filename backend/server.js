@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
@@ -7,6 +9,18 @@ const errorHandler = require('./middleware/error');
 
 // Initialize app
 const app = express();
+const server = http.createServer(app);
+
+// Socket.io setup — allow same origins as the frontend
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+// Make io accessible from controllers
+app.set('io', io);
 
 // Connect to database
 connectDB();
@@ -22,6 +36,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/mentors', require('./routes/mentors'));
+app.use('/api/mentees', require('./routes/mentees'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/messages', require('./routes/messages'));
 app.use('/api/resources', require('./routes/resources'));
@@ -35,11 +50,20 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Cre8 API is running' });
 });
 
+// Socket.io connection — each user joins their own room keyed by userId
+io.on('connection', (socket) => {
+  socket.on('join', (userId) => {
+    socket.join(userId);
+  });
+
+  socket.on('disconnect', () => {});
+});
+
 // Error handler middleware (must be last)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

@@ -45,6 +45,12 @@
   color: #374151;
 }
 
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .profile-content {
   background: white;
   border-radius: 12px;

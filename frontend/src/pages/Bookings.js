@@ -57,7 +57,7 @@ const Bookings = () => {
 
   const handleMentorClick = (e, mentorId) => {
     e.stopPropagation();
-    if (mentorId) navigate(`/mentors/${mentorId}`);
+    if (mentorId) navigate(`/mentor/${mentorId}`);
   };
 
   const handleSubmitFeedback = async (e) => {

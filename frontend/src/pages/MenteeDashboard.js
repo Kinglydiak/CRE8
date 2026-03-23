@@ -73,9 +73,14 @@ const MenteeDashboard = () => {
             <h1>Welcome back, {user?.name}!</h1>
             <p className="dashboard-subtitle">Here's your learning journey overview</p>
           </div>
-          <Link to="/mentors" className="btn btn-primary">
-            Find Mentors
-          </Link>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Link to="/mentors" className="btn btn-primary">
+              Find Mentors
+            </Link>
+            <Link to="/mentee/settings" className="btn btn-secondary">
+              Settings
+            </Link>
+          </div>
         </div>
 
         {/* Stats Cards */}

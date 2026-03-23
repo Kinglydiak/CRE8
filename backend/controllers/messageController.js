@@ -21,8 +21,16 @@ const sendMessage = async (req, res) => {
       booking: bookingId || null
     });
 
-    await message.populate('sender', 'name profilePicture');
-    await message.populate('receiver', 'name profilePicture');
+    await message.populate('sender', 'name profilePicture role');
+    await message.populate('receiver', 'name profilePicture role');
+
+    // Emit real-time event to both sender and receiver rooms
+    const io = req.app.get('io');
+    if (io) {
+      const payload = message.toObject();
+      io.to(receiverId.toString()).emit('new_message', payload);
+      io.to(req.user._id.toString()).emit('new_message', payload);
+    }
 
     res.status(201).json({
       success: true,
@@ -65,41 +73,57 @@ const getConversation = async (req, res) => {
 // @access  Private
 const getAllConversations = async (req, res) => {
   try {
-    const messages = await Message.aggregate([
+    const currentUserId = req.user._id;
+
+    // Aggregate: get the last message content/date for each unique conversation partner
+    const rows = await Message.aggregate([
       {
         $match: {
           $or: [
-            { sender: req.user._id },
-            { receiver: req.user._id }
+            { sender: currentUserId },
+            { receiver: currentUserId }
           ]
         }
       },
-      {
-        $sort: { createdAt: -1 }
-      },
+      { $sort: { createdAt: -1 } },
       {
         $group: {
           _id: {
             $cond: [
-              { $eq: ['$sender', req.user._id] },
+              { $eq: ['$sender', currentUserId] },
               '$receiver',
               '$sender'
             ]
           },
-          lastMessage: { $first: '$$ROOT' }
+          lastContent: { $first: '$content' },
+          lastCreatedAt: { $first: '$createdAt' }
         }
       }
     ]);
 
-    await Message.populate(messages, {
-      path: 'lastMessage.sender lastMessage.receiver',
-      select: 'name profilePicture'
-    });
+    // Fetch each partner user directly — avoids the aggregate-populate null bug
+    const conversations = await Promise.all(
+      rows.map(async (row) => {
+        const otherUser = await User.findById(row._id)
+          .select('name profilePicture role')
+          .lean();
+        return {
+          otherUserId: row._id.toString(),
+          otherUser: otherUser
+            ? { _id: otherUser._id, name: otherUser.name, profilePicture: otherUser.profilePicture, role: otherUser.role }
+            : { _id: row._id, name: 'Unknown User', profilePicture: '' },
+          lastMessage: {
+            content: row.lastContent,
+            createdAt: row.lastCreatedAt
+          }
+        };
+      })
+    );
 
     res.json({
       success: true,
-      count: messages.length,
-      data: messages
+      count: conversations.length,
+      data: conversations
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

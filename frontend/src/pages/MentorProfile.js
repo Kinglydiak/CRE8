@@ -144,12 +144,20 @@ const MentorProfile = () => {
               <span>• {(mentor.pricePerSession || 0).toLocaleString()} RWF/hour</span>
             </div>
             {user && user.role === 'mentee' && (
-              <button 
-                className="btn btn-primary"
-                onClick={openBookingModal}
-              >
-                Book a Session
-              </button>
+              <div className="profile-actions">
+                <button 
+                  className="btn btn-primary"
+                  onClick={openBookingModal}
+                >
+                  Book a Session
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => navigate('/messages', { state: { userId: mentor._id, userName: mentor.name, userPicture: mentor.profilePicture } })}
+                >
+                  Send Message
+                </button>
+              </div>
             )}
           </div>
         </div>

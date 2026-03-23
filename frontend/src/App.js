@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar';
@@ -20,12 +21,14 @@ import MentorBookings from './pages/MentorBookings';
 import MentorResources from './pages/MentorResources';
 import Messages from './pages/Messages';
 import MentorProfileSettings from './pages/MentorProfileSettings';
+import MenteeSettings from './pages/MenteeSettings';
 import Wallet from './pages/Wallet';
 import './App.css';
 
 function App() {
   return (
     <AuthProvider>
+      <SocketProvider>
       <Router>
         <ErrorBoundary>
         <div className="App">
@@ -123,10 +126,19 @@ function App() {
                 </PrivateRoute>
               } 
             />
+            <Route 
+              path="/mentee/settings" 
+              element={
+                <PrivateRoute allowedRoles={['mentee']}>
+                  <MenteeSettings />
+                </PrivateRoute>
+              } 
+            />
           </Routes>
         </div>
         </ErrorBoundary>
       </Router>
+      </SocketProvider>
     </AuthProvider>
   );
 }

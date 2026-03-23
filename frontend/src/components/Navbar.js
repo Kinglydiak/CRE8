@@ -29,6 +29,7 @@ const Navbar = () => {
                     <Link to="/mentors" className="nav-link">Find Mentors</Link>
                     <Link to="/bookings" className="nav-link">My Bookings</Link>
                     <Link to="/messages" className="nav-link">Messages</Link>
+                    <Link to="/mentee/settings" className="nav-link">Settings</Link>
                   </>
                 )}
 
@@ -37,7 +38,9 @@ const Navbar = () => {
                     <Link to="/dashboard" className="nav-link">Dashboard</Link>
                     <Link to="/mentor/bookings" className="nav-link">Bookings</Link>
                     <Link to="/mentor/resources" className="nav-link">Resources</Link>
+                    <Link to="/messages" className="nav-link">Messages</Link>
                     <Link to="/mentor/wallet" className="nav-link">💰 Wallet</Link>
+                    <Link to="/mentor/profile" className="nav-link">Settings</Link>
                   </>
                 )}
 
