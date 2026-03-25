@@ -25,7 +25,13 @@ const Bookings = () => {
     try {
       setLoading(true);
       const data = await getBookings();
-      setBookings(data.data || []);
+      const updated = data.data || [];
+      setBookings(updated);
+      // Keep selectedBooking in sync if the modal is open
+      if (selectedBooking) {
+        const fresh = updated.find(b => b._id === selectedBooking._id);
+        if (fresh) setSelectedBooking(fresh);
+      }
     } catch (error) {
       console.error('Failed to fetch bookings:', error);
     } finally {
@@ -342,6 +348,43 @@ const Bookings = () => {
                 </div>
               )}
 
+              {/* Meeting Link — shown to mentee when confirmed */}
+              {selectedBooking.status === 'confirmed' && user.role === 'mentee' && (
+                <div className="details-section">
+                  <h4>Join Your Session</h4>
+                  {selectedBooking.meetingLink ? (
+                    <a
+                      href={selectedBooking.meetingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary"
+                      style={{ display: 'inline-block', textAlign: 'center', width: '100%' }}
+                    >
+                      🎥 Join Session
+                    </a>
+                  ) : (
+                    <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>
+                      ⏳ Waiting for your mentor to add the meeting link. Check back soon!
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Meeting Link — shown to mentor too */}
+              {selectedBooking.status === 'confirmed' && selectedBooking.meetingLink && user.role === 'mentor' && (
+                <div className="details-section">
+                  <h4>Meeting Link</h4>
+                  <a
+                    href={selectedBooking.meetingLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#6366f1', wordBreak: 'break-all', fontSize: '0.85rem' }}
+                  >
+                    {selectedBooking.meetingLink}
+                  </a>
+                </div>
+              )}
+
               <div className="details-modal-footer">
                 {selectedBooking.status === 'pending' && (
                   <button
@@ -359,6 +402,7 @@ const Bookings = () => {
                     Leave Feedback
                   </button>
                 )}
+                <button className="btn btn-secondary" onClick={fetchBookings} style={{ marginRight: 'auto' }}>↻ Refresh</button>
                 <button className="btn btn-secondary" onClick={() => setShowDetailsModal(false)}>Close</button>
               </div>
             </div>

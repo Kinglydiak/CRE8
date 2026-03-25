@@ -8,6 +8,13 @@ const MentorBookings = () => {
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
+  // Confirm modal state
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmBookingId, setConfirmBookingId] = useState(null);
+  const [meetingLink, setMeetingLink] = useState('');
+  const [confirming, setConfirming] = useState(false);
+  const [confirmModalMode, setConfirmModalMode] = useState('confirm'); // 'confirm' | 'update'
+
   useEffect(() => {
     fetchBookings();
   }, []);
@@ -25,11 +32,40 @@ const MentorBookings = () => {
     }
   };
 
+  const openConfirmModal = (bookingId, mode = 'confirm', existingLink = '') => {
+    setConfirmBookingId(bookingId);
+    setMeetingLink(existingLink);
+    setConfirmModalMode(mode);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmBooking = async (e) => {
+    e.preventDefault();
+    try {
+      setConfirming(true);
+      if (confirmModalMode === 'confirm') {
+        await updateBookingStatus(confirmBookingId, 'confirmed', meetingLink);
+        toast.success('Booking confirmed! Mentee has been notified.');
+      } else {
+        // update link only — keep status as confirmed
+        await updateBookingStatus(confirmBookingId, 'confirmed', meetingLink);
+        toast.success('Meeting link updated!');
+      }
+      setShowConfirmModal(false);
+      fetchBookings();
+    } catch (error) {
+      console.error('Failed to update booking:', error);
+      toast.error('Failed to update booking');
+    } finally {
+      setConfirming(false);
+    }
+  };
+
   const handleStatusUpdate = async (bookingId, newStatus) => {
     try {
       await updateBookingStatus(bookingId, newStatus);
       toast.success(`Booking ${newStatus}`);
-      fetchBookings(); // Refresh the list
+      fetchBookings();
     } catch (error) {
       console.error('Failed to update booking:', error);
       toast.error('Failed to update booking status');
@@ -166,16 +202,32 @@ const MentorBookings = () => {
                     )}
                   </div>
 
+                  {/* Meeting Link (shown when confirmed) */}
+                  {booking.status === 'confirmed' && booking.meetingLink && (
+                    <div className="booking-detail-item full-width" style={{ marginTop: '8px' }}>
+                      <span className="detail-label">Meeting Link:</span>
+                      <a
+                        href={booking.meetingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="detail-value"
+                        style={{ color: '#6366f1', wordBreak: 'break-all' }}
+                      >
+                        {booking.meetingLink}
+                      </a>
+                    </div>
+                  )}
+
                   {/* Action Buttons */}
                   {booking.status === 'pending' && (
                     <div className="booking-actions">
-                      <button 
+                      <button
                         className="btn btn-success"
-                        onClick={() => handleStatusUpdate(booking._id, 'confirmed')}
+                        onClick={() => openConfirmModal(booking._id)}
                       >
                         Accept
                       </button>
-                      <button 
+                      <button
                         className="btn btn-danger"
                         onClick={() => handleStatusUpdate(booking._id, 'cancelled')}
                       >
@@ -183,16 +235,22 @@ const MentorBookings = () => {
                       </button>
                     </div>
                   )}
-                  
+
                   {booking.status === 'confirmed' && (
                     <div className="booking-actions">
-                      <button 
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => openConfirmModal(booking._id, 'update', booking.meetingLink || '')}
+                      >
+                        {booking.meetingLink ? '✏️ Update Link' : '🔗 Add Meeting Link'}
+                      </button>
+                      <button
                         className="btn btn-primary"
                         onClick={() => handleStatusUpdate(booking._id, 'completed')}
                       >
                         Mark as Completed
                       </button>
-                      <button 
+                      <button
                         className="btn btn-danger"
                         onClick={() => handleStatusUpdate(booking._id, 'cancelled')}
                       >
@@ -207,6 +265,7 @@ const MentorBookings = () => {
             <div className="empty-state">
               <div className="empty-icon"></div>
               <h3>No {filter !== 'all' ? filter : ''} bookings</h3>
+
               <p>
                 {filter === 'pending' 
                   ? 'You have no pending booking requests at the moment.'
@@ -220,6 +279,38 @@ const MentorBookings = () => {
           )}
         </div>
       </div>
+
+      {/* Confirm + Meeting Link Modal */}
+      {showConfirmModal && (
+        <div className="modal-overlay" onClick={() => setShowConfirmModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <h2 style={{ marginBottom: '8px' }}>{confirmModalMode === 'confirm' ? 'Confirm Booking' : 'Meeting Link'}</h2>
+            <p style={{ color: '#6b7280', marginBottom: '20px', fontSize: '0.9rem' }}>
+              {confirmModalMode === 'confirm'
+                ? 'Paste your meeting link below (Google Meet, Zoom, etc.) so the mentee knows where to join.'
+                : 'Update the meeting link for this session. The mentee will see it in their booking details.'}
+            </p>
+            <form onSubmit={handleConfirmBooking}>
+              <div className="form-group">
+                <label>Meeting Link <span style={{ color: '#9ca3af', fontWeight: 400 }}>(optional but recommended)</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                  value={meetingLink}
+                  onChange={e => setMeetingLink(e.target.value)}
+                />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowConfirmModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-success" disabled={confirming}>
+                  {confirming ? 'Saving...' : confirmModalMode === 'confirm' ? 'Confirm Booking' : 'Save Link'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

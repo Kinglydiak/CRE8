@@ -202,7 +202,27 @@ const updateBookingStatus = async (req, res) => {
     }
 
     booking.status = status;
+    if (req.body.meetingLink !== undefined) {
+      booking.meetingLink = req.body.meetingLink.trim();
+    }
     const updatedBooking = await booking.save();
+
+    // Notify mentee about confirmation + meeting link
+    if (status === 'confirmed') {
+      try {
+        await booking.populate('mentee', 'name email');
+        const linkLine = booking.meetingLink
+          ? `\n\nJoin your session here: ${booking.meetingLink}`
+          : '';
+        await sendEmail({
+          email: booking.mentee.email,
+          subject: 'Session Confirmed - Cre8',
+          message: `Great news! Your session on ${new Date(booking.sessionDate).toLocaleString()} has been confirmed.${linkLine}`
+        });
+      } catch (e) {
+        console.error('Confirmation email failed:', e.message);
+      }
+    }
 
     res.json({
       success: true,

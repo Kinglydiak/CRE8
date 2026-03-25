@@ -20,9 +20,11 @@ export const getBooking = async (id) => {
   return response.data;
 };
 
-// Update booking status
-export const updateBookingStatus = async (id, status) => {
-  const response = await axios.put(`${API_URL}/${id}/status`, { status });
+// Update booking status (optionally include meetingLink when confirming)
+export const updateBookingStatus = async (id, status, meetingLink) => {
+  const body = { status };
+  if (meetingLink !== undefined) body.meetingLink = meetingLink;
+  const response = await axios.put(`${API_URL}/${id}/status`, body);
   return response.data;
 };
 
