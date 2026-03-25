@@ -15,14 +15,14 @@ const MentorProfile = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingData, setBookingData] = useState({ sessionDate: '', duration: 60, topic: '', notes: '' });
   const [bookingStep, setBookingStep] = useState(1);
-  const [bookingPayData, setBookingPayData] = useState({ phoneNumber: '', paymentMethod: 'mtn_momo' });
+  const [bookingPayData, setBookingPayData] = useState({ phoneNumber: '+250', paymentMethod: 'mtn_momo' });
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState(null);
 
   // Payment modal
   const [showPayModal, setShowPayModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [payData, setPayData] = useState({ phoneNumber: '', paymentMethod: 'mtn_momo' });
+  const [payData, setPayData] = useState({ phoneNumber: '+250', paymentMethod: 'mtn_momo' });
   const [payLoading, setPayLoading] = useState(false);
   const [payResult, setPayResult] = useState(null);
 
@@ -61,14 +61,14 @@ const MentorProfile = () => {
     if (!user) { navigate('/login'); return; }
     if (user.role !== 'mentee') { alert('Only mentees can enroll in courses'); return; }
     setSelectedCourse(course);
-    setPayData({ phoneNumber: '', paymentMethod: 'mtn_momo' });
+    setPayData({ phoneNumber: '+250', paymentMethod: 'mtn_momo' });
     setPayResult(null);
     setShowPayModal(true);
   };
 
   const handlePaySubmit = async (e) => {
     e.preventDefault();
-    if (!payData.phoneNumber) return;
+    if (payData.phoneNumber.length <= 4) return;
     try {
       setPayLoading(true);
       const result = await initiatePayment(selectedCourse._id, payData);
@@ -90,7 +90,7 @@ const MentorProfile = () => {
     if (user.role !== 'mentee') { alert('Only mentees can book sessions'); return; }
     setBookingStep(1);
     setBookingResult(null);
-    setBookingPayData({ phoneNumber: '', paymentMethod: 'mtn_momo' });
+    setBookingPayData({ phoneNumber: '+250', paymentMethod: 'mtn_momo' });
     setShowBookingModal(true);
   };
 
@@ -101,7 +101,7 @@ const MentorProfile = () => {
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    if (!bookingPayData.phoneNumber) return;
+    if (bookingPayData.phoneNumber.length <= 4) return;
     try {
       setBookingLoading(true);
       const result = await createBooking({
@@ -139,7 +139,7 @@ const MentorProfile = () => {
             <h1>{mentor.name}</h1>
             <p className="profile-location">{mentor.location || 'Location not specified'}</p>
             <div className="profile-stats">
-              <span>⭐ {mentor.rating ? mentor.rating.toFixed(1) : 'N/A'} ({mentor.totalRatings} ratings)</span>
+              <span>{mentor.rating ? mentor.rating.toFixed(1) : 'N/A'} ({mentor.totalRatings} ratings)</span>
               <span>• {mentor.completedSessions || 0} sessions completed</span>
               <span>• {(mentor.pricePerSession || 0).toLocaleString()} RWF/hour</span>
             </div>
@@ -228,8 +228,8 @@ const MentorProfile = () => {
                       )}
                       <div className="course-footer">
                         <div className="course-info">
-                          {course.duration && <span className="course-duration">⏱ {course.duration}</span>}
-                          <span className="course-enrollments">👥 {course.enrollments} enrolled</span>
+                          {course.duration && <span className="course-duration">{course.duration}</span>}
+                          <span className="course-enrollments">{course.enrollments} enrolled</span>
                         </div>
                         <div className="course-price-row">
                           <span className="course-price">
@@ -259,7 +259,7 @@ const MentorProfile = () => {
             <div className="modal-content" onClick={e => e.stopPropagation()}>
               {payResult ? (
                 <div className="pay-success">
-                  <div className="pay-success-icon">✅</div>
+                  <div className="pay-success-icon"></div>
                   <h2>Payment Initiated!</h2>
                   <p>Approve the prompt sent to <strong>{payResult.phoneNumber}</strong></p>
                   <div className="pay-summary">
@@ -268,7 +268,7 @@ const MentorProfile = () => {
                     <div className="pay-row"><span>Reference</span><span className="tx-ref">{payResult.transactionRef}</span></div>
                     <div className="pay-row"><span>Status</span><span className="status-pending">Pending</span></div>
                   </div>
-                  <p className="pay-note">💡 Keep this reference in case you need to follow up.</p>
+                  <p className="pay-note">Keep this reference in case you need to follow up.</p>
                   <button className="btn btn-primary" onClick={() => { setShowPayModal(false); setPayResult(null); }}>
                     Done
                   </button>
@@ -302,7 +302,7 @@ const MentorProfile = () => {
                         className="form-control"
                         placeholder="e.g. +224 622 000 000"
                         value={payData.phoneNumber}
-                        onChange={e => setPayData({ ...payData, phoneNumber: e.target.value })}
+                        onChange={e => { if (e.target.value.startsWith('+250')) setPayData({ ...payData, phoneNumber: e.target.value }); }}
                         required
                       />
                     </div>
@@ -328,7 +328,7 @@ const MentorProfile = () => {
               {/* ── Success Screen ── */}
               {bookingResult ? (
                 <div className="pay-success">
-                  <div className="pay-success-icon">✅</div>
+                  <div className="pay-success-icon"></div>
                   <h2>Booking & Payment Initiated!</h2>
                   <p>Approve the MoMo prompt sent to <strong>{bookingResult.phoneNumber}</strong></p>
                   <div className="pay-summary">
@@ -339,7 +339,7 @@ const MentorProfile = () => {
                     <div className="pay-row"><span>Reference</span><span className="tx-ref">{bookingResult.transactionRef}</span></div>
                     <div className="pay-row"><span>Status</span><span className="status-pending">Pending</span></div>
                   </div>
-                  <p className="pay-note">💡 Your booking will be confirmed once payment is verified.</p>
+                  <p className="pay-note">Your booking will be confirmed once payment is verified.</p>
                   <button className="btn btn-primary" onClick={() => { setShowBookingModal(false); setBookingResult(null); setBookingStep(1); navigate('/bookings'); }}>
                     View My Bookings
                   </button>
@@ -437,9 +437,9 @@ const MentorProfile = () => {
                         <input
                           type="tel"
                           className="form-control"
-                          placeholder="e.g. +224 622 000 000"
+                          placeholder="e.g. +250 788 000 000"
                           value={bookingPayData.phoneNumber}
-                          onChange={e => setBookingPayData({ ...bookingPayData, phoneNumber: e.target.value })}
+                          onChange={e => { if (e.target.value.startsWith('+250')) setBookingPayData({ ...bookingPayData, phoneNumber: e.target.value }); }}
                           required
                         />
                       </div>

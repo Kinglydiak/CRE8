@@ -11,8 +11,16 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login } = useContext(AuthContext);
+  const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Already logged in — redirect away from the login page immediately
+  React.useEffect(() => {
+    if (user) {
+      const dest = user.role === 'mentor' ? '/mentor/dashboard' : '/mentee/dashboard';
+      navigate(dest, { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData({

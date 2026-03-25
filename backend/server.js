@@ -11,10 +11,20 @@ const errorHandler = require('./middleware/error');
 const app = express();
 const server = http.createServer(app);
 
-// Socket.io setup — allow same origins as the frontend
+// Allowed origins: FRONTEND_URL env var (comma-separated list) or localhost in dev
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map(o => o.trim())
+  : ['http://localhost:3000', 'http://localhost:5173'];
+
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true
+};
+
+// Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
   }
 });
@@ -26,7 +36,7 @@ app.set('io', io);
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -43,6 +53,7 @@ app.use('/api/resources', require('./routes/resources'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/courses', require('./routes/courses'));
 app.use('/api/wallet', require('./routes/wallet'));
+app.use('/api/payments', require('./routes/payments'));
 app.use('/api/upload', require('./routes/upload'));
 
 // Health check route

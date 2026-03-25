@@ -51,6 +51,16 @@ const MentorBookings = () => {
     }
   };
 
+  const getDateStatus = (sessionDate) => {
+    const today = new Date();
+    const session = new Date(sessionDate);
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const sessionMidnight = new Date(session.getFullYear(), session.getMonth(), session.getDate());
+    if (sessionMidnight.getTime() === todayMidnight.getTime()) return { label: 'TODAY', color: '#f97316' };
+    if (sessionMidnight > todayMidnight) return { label: 'UPCOMING', color: '#6366f1' };
+    return { label: 'PASSED', color: '#9ca3af' };
+  };
+
   if (loading) {
     return <div className="spinner"></div>;
   }
@@ -60,7 +70,7 @@ const MentorBookings = () => {
       <div className="container">
         <div className="dashboard-header">
           <div>
-            <h1>📅 Manage Bookings</h1>
+            <h1>Manage Bookings</h1>
             <p className="dashboard-subtitle">View and respond to session requests from your mentees</p>
           </div>
         </div>
@@ -111,21 +121,26 @@ const MentorBookings = () => {
                         <p className="user-email">{booking.mentee?.email || 'No email'}</p>
                       </div>
                     </div>
-                    <span 
-                      className="status-badge" 
-                      style={{ backgroundColor: getStatusColor(booking.status) }}
-                    >
-                      {booking.status}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {(() => { const ds = getDateStatus(booking.sessionDate); return (
+                        <span className="status-badge" style={{ backgroundColor: ds.color }}>{ds.label}</span>
+                      ); })()}
+                      <span 
+                        className="status-badge" 
+                        style={{ backgroundColor: getStatusColor(booking.status) }}
+                      >
+                        {booking.status}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="booking-details">
                     <div className="booking-detail-item">
-                      <span className="detail-label">📚 Topic:</span>
+                      <span className="detail-label">Topic:</span>
                       <span className="detail-value">{booking.topic}</span>
                     </div>
                     <div className="booking-detail-item">
-                      <span className="detail-label">📅 Date:</span>
+                      <span className="detail-label">Date:</span>
                       <span className="detail-value">
                         {new Date(booking.sessionDate).toLocaleDateString('en-US', {
                           weekday: 'long',
@@ -136,16 +151,16 @@ const MentorBookings = () => {
                       </span>
                     </div>
                     <div className="booking-detail-item">
-                      <span className="detail-label">⏰ Time:</span>
+                      <span className="detail-label">Time:</span>
                       <span className="detail-value">{booking.sessionTime}</span>
                     </div>
                     <div className="booking-detail-item">
-                      <span className="detail-label">⏱️ Duration:</span>
+                      <span className="detail-label">Duration:</span>
                       <span className="detail-value">{booking.duration} minutes</span>
                     </div>
                     {booking.notes && (
                       <div className="booking-detail-item full-width">
-                        <span className="detail-label">📝 Notes:</span>
+                        <span className="detail-label">Notes:</span>
                         <p className="detail-value">{booking.notes}</p>
                       </div>
                     )}
@@ -158,13 +173,13 @@ const MentorBookings = () => {
                         className="btn btn-success"
                         onClick={() => handleStatusUpdate(booking._id, 'confirmed')}
                       >
-                        ✓ Accept
+                        Accept
                       </button>
                       <button 
                         className="btn btn-danger"
                         onClick={() => handleStatusUpdate(booking._id, 'cancelled')}
                       >
-                        ✗ Decline
+                        Decline
                       </button>
                     </div>
                   )}
@@ -190,7 +205,7 @@ const MentorBookings = () => {
             </div>
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">📅</div>
+              <div className="empty-icon"></div>
               <h3>No {filter !== 'all' ? filter : ''} bookings</h3>
               <p>
                 {filter === 'pending' 

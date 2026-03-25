@@ -250,7 +250,7 @@ const Mentors = () => {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-icon">🔍</div>
+            <div className="empty-icon"></div>
             <h3>No Mentors Found</h3>
             <p>Try adjusting your search filters or browse all available mentors.</p>
             <button 

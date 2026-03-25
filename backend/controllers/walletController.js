@@ -2,6 +2,7 @@ const Mentor = require('../models/Mentor');
 const Payment = require('../models/Payment');
 const Withdrawal = require('../models/Withdrawal');
 const { randomUUID } = require('crypto');
+const { transfer } = require('../utils/mtnMoMo');
 
 // @desc    Get mentor wallet (balance + history)
 // @route   GET /api/wallet
@@ -81,6 +82,33 @@ const requestWithdrawal = async (req, res) => {
       notes: notes || '',
       status: 'pending'
     });
+
+    // Call MTN Disbursements API to push funds to mentor's phone
+    let momoReferenceId = transactionRef;
+    try {
+      momoReferenceId = await transfer({
+        amount,
+        currency: mentor.walletCurrency || 'RWF',
+        phoneNumber,
+        externalId: transactionRef,
+        payerMessage: `CRE8 payout to ${req.user.name}`,
+        payeeNote: `Withdrawal ${withdrawal._id}`
+      });
+      await Withdrawal.findByIdAndUpdate(withdrawal._id, {
+        transactionRef: momoReferenceId,
+        status: 'processing'
+      });
+    } catch (momoErr) {
+      console.error('MTN MoMo transfer error:', momoErr.message);
+      // Refund the deducted balance since the transfer failed
+      mentor.walletBalance = parseFloat((mentor.walletBalance + amount).toFixed(2));
+      await mentor.save();
+      await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' });
+      return res.status(502).json({
+        success: false,
+        message: 'Mobile money transfer failed. Your balance has been restored. Please try again.'
+      });
+    }
 
     res.status(201).json({
       success: true,

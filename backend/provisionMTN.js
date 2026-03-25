@@ -1,6 +1,18 @@
 const https = require('https');
-const subscriptionKey = '77a3e51b754e4da3bcd91be7626ed9c7';
-const userId = '83f0d8a7-c034-4a41-889b-f8cd5d56e099';
+const { randomUUID } = require('crypto');
+require('dotenv').config();
+
+// Reads MTN_SUBSCRIPTION_KEY from your .env file
+// (After subscribing to Collections at momodeveloper.mtn.com)
+const subscriptionKey = process.env.MTN_SUBSCRIPTION_KEY;
+if (!subscriptionKey) {
+  console.error('ERROR: MTN_SUBSCRIPTION_KEY is not set in your .env file.');
+  console.error('Go to https://momodeveloper.mtn.com, subscribe to Collections, and paste your Primary Key as MTN_SUBSCRIPTION_KEY in .env');
+  process.exit(1);
+}
+
+// Generate a fresh UUID for each new provisioning run
+const userId = randomUUID();
 
 function request(options, body) {
   return new Promise((resolve, reject) => {
@@ -39,9 +51,9 @@ async function provision() {
     method: 'POST',
     headers: {
       'Ocp-Apim-Subscription-Key': subscriptionKey,
-      'Content-Type': 'application/json'
+      'Content-Length': '0'
     }
-  }, ' ');
+  });
 
   console.log('Get API key status:', r2.status, r2.body);
   const parsed = JSON.parse(r2.body);

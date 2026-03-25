@@ -78,6 +78,16 @@ const Bookings = () => {
     return booking.status === filter;
   });
 
+  const getDateStatus = (sessionDate) => {
+    const today = new Date();
+    const session = new Date(sessionDate);
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const sessionMidnight = new Date(session.getFullYear(), session.getMonth(), session.getDate());
+    if (sessionMidnight.getTime() === todayMidnight.getTime()) return { label: 'TODAY', color: '#f97316' };
+    if (sessionMidnight > todayMidnight) return { label: 'UPCOMING', color: '#6366f1' };
+    return { label: 'PASSED', color: '#9ca3af' };
+  };
+
   if (loading) {
     return <div className="spinner"></div>;
   }
@@ -132,9 +142,14 @@ const Bookings = () => {
                       `Session with ${booking.mentee?.name || 'Unknown Mentee'}`
                     )}
                   </h3>
-                  <span className={`status-badge status-${booking.status}`}>
-                    {booking.status}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {(() => { const ds = getDateStatus(booking.sessionDate); return (
+                      <span className="status-badge" style={{ backgroundColor: ds.color }}>{ds.label}</span>
+                    ); })()}
+                    <span className={`status-badge status-${booking.status}`}>
+                      {booking.status}
+                    </span>
+                  </div>
                 </div>
                 
                 <div className="booking-details">
@@ -165,7 +180,7 @@ const Bookings = () => {
                   
                   {booking.feedback && (
                     <div className="feedback-display">
-                      <p><strong>Your Rating:</strong> {'⭐'.repeat(booking.feedback.rating)}</p>
+                      <p><strong>Your Rating:</strong> {booking.feedback.rating}/5</p>
                       <p><strong>Comment:</strong> {booking.feedback.comment}</p>
                     </div>
                   )}
@@ -177,7 +192,7 @@ const Bookings = () => {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-state-icon">📅</div>
+            <div className="empty-state-icon"></div>
             <h3>No Bookings Found</h3>
             <p>
               {filter === 'all' 
@@ -198,7 +213,7 @@ const Bookings = () => {
         {showDetailsModal && selectedBooking && (
           <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
             <div className="modal-content booking-details-modal" onClick={e => e.stopPropagation()}>
-              <button className="modal-close-btn" onClick={() => setShowDetailsModal(false)}>✕</button>
+              <button className="modal-close-btn" onClick={() => setShowDetailsModal(false)}>X</button>
               <div className="details-modal-header">
                 <div className={`details-status-badge status-${selectedBooking.status}`}>
                   {selectedBooking.status.toUpperCase()}
@@ -207,7 +222,7 @@ const Bookings = () => {
               </div>
 
               <div className="details-section">
-                <h4>📋 Session Info</h4>
+                <h4>Session Info</h4>
                 <div className="details-grid">
                   <div className="detail-item">
                     <span className="detail-label">Topic</span>
@@ -232,12 +247,12 @@ const Bookings = () => {
 
               {user.role === 'mentee' && selectedBooking.mentor && (
                 <div className="details-section">
-                  <h4>👤 Mentor</h4>
+                  <h4>Mentor</h4>
                   <div className="details-mentor-row">
                     {selectedBooking.mentor.profilePicture ? (
                       <img src={selectedBooking.mentor.profilePicture} alt={selectedBooking.mentor.name} className="details-mentor-avatar" />
                     ) : (
-                      <div className="details-mentor-avatar-placeholder">👤</div>
+                      <div className="details-mentor-avatar-placeholder"></div>
                     )}
                     <div>
                       <div className="details-mentor-name">{selectedBooking.mentor.name}</div>
@@ -257,7 +272,7 @@ const Bookings = () => {
 
               {user.role === 'mentor' && selectedBooking.mentee && (
                 <div className="details-section">
-                  <h4>👤 Mentee</h4>
+                  <h4>Mentee</h4>
                   <div className="details-grid">
                     <div className="detail-item">
                       <span className="detail-label">Name</span>
@@ -275,7 +290,7 @@ const Bookings = () => {
 
               {(selectedBooking.payment?.amount > 0 || selectedBooking.amount > 0) && (
                 <div className="details-section">
-                  <h4>💳 Payment</h4>
+                  <h4>Payment</h4>
                   <div className="details-grid">
                     <div className="detail-item">
                       <span className="detail-label">Amount Paid</span>
@@ -311,11 +326,11 @@ const Bookings = () => {
 
               {selectedBooking.feedback && (
                 <div className="details-section">
-                  <h4>⭐ Feedback</h4>
+                  <h4>Feedback</h4>
                   <div className="details-grid">
                     <div className="detail-item">
                       <span className="detail-label">Rating</span>
-                      <span className="detail-value">{'⭐'.repeat(selectedBooking.feedback.rating)} ({selectedBooking.feedback.rating}/5)</span>
+                      <span className="detail-value">{selectedBooking.feedback.rating}/5</span>
                     </div>
                     {selectedBooking.feedback.comment && (
                       <div className="detail-item detail-item-full">

@@ -43,6 +43,24 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // BFCache fix: when browser restores a page from back/forward cache,
+  // re-check that the token still exists. If not (e.g. user logged out in
+  // another tab or logout was called), clear state and redirect to login.
+  useEffect(() => {
+    const handlePageShow = (e) => {
+      if (e.persisted) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setUser(null);
+          delete axios.defaults.headers.common['Authorization'];
+          window.location.replace('/login');
+        }
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
+
   const login = async (email, password) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
@@ -86,6 +104,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
+    // Replace history so the back button cannot return to a protected page
+    window.location.replace('/login');
   };
 
   const updateUser = (userData) => {

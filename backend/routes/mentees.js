@@ -2,6 +2,24 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
 const User = require('../models/User');
+const Mentee = require('../models/Mentee');
+const Course = require('../models/Course');
+
+// @desc    Get enrolled courses for a mentee
+// @route   GET /api/mentees/my-courses
+// @access  Private (mentee only)
+router.get('/my-courses', protect, authorize('mentee'), async (req, res) => {
+  try {
+    // Must use Mentee model — User base model doesn't expose the enrolledCourses discriminator field
+    const mentee = await Mentee.findById(req.user._id).select('enrolledCourses').lean();
+    const enrolledIds = mentee?.enrolledCourses || [];
+    const courses = await Course.find({ _id: { $in: enrolledIds } })
+      .populate('mentor', 'name profilePicture');
+    res.json({ success: true, data: courses });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // @desc    Update mentee profile
 // @route   PUT /api/mentees/profile

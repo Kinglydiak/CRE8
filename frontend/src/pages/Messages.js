@@ -147,7 +147,7 @@ const Messages = () => {
       <div className="container">
         <div className="dashboard-header">
           <div>
-            <h1>💬 Messages</h1>
+            <h1>Messages</h1>
             <p className="dashboard-subtitle">Chat with your mentees and stay connected</p>
           </div>
         </div>
@@ -253,7 +253,7 @@ const Messages = () => {
               </>
             ) : (
               <div className="no-conversation-selected">
-                <div className="empty-icon">💬</div>
+                <div className="empty-icon"></div>
                 <h3>Select a conversation</h3>
                 <p>Choose a mentee from the list to start messaging</p>
               </div>

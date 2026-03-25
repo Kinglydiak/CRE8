@@ -1,3 +1,15 @@
+*, *::before, *::after { box-sizing: border-box; }
+
 .App {
   min-height: 100vh;
+}
+
+/* When sidebar is visible, allow smooth margin transition */
+.app-main {
+  transition: margin-left 0.25s ease;
+  min-height: 100vh;
+}
+
+.app-with-sidebar .app-main {
+  background: #f3f4f6;
 }

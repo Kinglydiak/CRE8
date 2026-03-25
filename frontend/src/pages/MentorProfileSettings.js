@@ -184,7 +184,7 @@ const MentorProfileSettings = () => {
       <div className="container">
         <div className="dashboard-header">
           <div>
-            <h1>⚙️ Profile Settings</h1>
+            <h1>Profile Settings</h1>
             <p className="dashboard-subtitle">Update your availability, pricing, and profile information</p>
           </div>
         </div>
@@ -229,7 +229,7 @@ const MentorProfileSettings = () => {
                       />
                     ) : (
                       <div className="photo-preview-empty">
-                        <span>👤</span>
+                        <span></span>
                       </div>
                     )}
                   </div>
@@ -247,7 +247,7 @@ const MentorProfileSettings = () => {
                       onClick={() => fileInputRef.current.click()}
                       disabled={photoUploading}
                     >
-                      {photoUploading ? 'Uploading…' : '📷 Choose Photo'}
+                      {photoUploading ? 'Uploading…' : 'Choose Photo'}
                     </button>
                     {formData.profilePicture && (
                       <button
@@ -377,7 +377,7 @@ const MentorProfileSettings = () => {
         <div className="dashboard-section">
           <div className="dashboard-header" style={{ marginBottom: '20px' }}>
             <div>
-              <h2>📚 My Courses</h2>
+              <h2>My Courses</h2>
               <p className="dashboard-subtitle">Create and manage the courses you offer to mentees</p>
             </div>
             <button className="btn btn-primary" onClick={openNewCourse}>+ Add Course</button>
@@ -395,8 +395,8 @@ const MentorProfileSettings = () => {
                     {course.category && <span className="course-cat-badge">{course.category}</span>}
                   </div>
                   <div className="course-manage-meta">
-                    {course.duration && <span>⏱ {course.duration}</span>}
-                    <span>👥 {course.enrollments} enrolled</span>
+                    {course.duration && <span>{course.duration}</span>}
+                    <span>{course.enrollments} enrolled</span>
                     <span className="course-price-badge">{course.price === 0 ? 'Free' : `${course.price.toLocaleString()} ${course.currency}`}</span>
                   </div>
                   <div className="course-manage-actions">
@@ -435,7 +435,7 @@ const MentorProfileSettings = () => {
             <div className="account-stat">
               <span className="stat-label">Average Rating</span>
               <span className="stat-value">
-                {user?.rating ? `⭐ ${user.rating.toFixed(1)}` : 'No ratings yet'}
+                {user?.rating ? `${user.rating.toFixed(1)}` : 'No ratings yet'}
               </span>
             </div>
           </div>

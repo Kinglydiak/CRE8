@@ -42,22 +42,22 @@ const Home = () => {
           <h2 className="section-title">Why Choose Cre8?</h2>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">🎯</div>
+              <div className="feature-icon"></div>
               <h3>Expert Mentors</h3>
               <p>Learn from industry professionals with proven track records</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">💡</div>
+              <div className="feature-icon"></div>
               <h3>Flexible Learning</h3>
               <p>Schedule sessions at your convenience and learn at your own pace</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🌍</div>
+              <div className="feature-icon"></div>
               <h3>African Focus</h3>
               <p>Mentorship tailored to the African creative industry landscape</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">💰</div>
+              <div className="feature-icon"></div>
               <h3>Affordable</h3>
               <p>Access quality mentorship at prices that work for you</p>
             </div>

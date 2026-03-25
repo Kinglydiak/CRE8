@@ -11,8 +11,9 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (user?._id) {
-      // Connect directly to backend (bypasses Vite proxy for WebSockets)
-      const s = io('http://localhost:5001', { transports: ['websocket'] });
+      // In production use VITE_API_URL; in dev fall back to localhost (Vite proxy doesn't cover WS)
+      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const s = io(backendUrl, { transports: ['websocket'] });
       socketRef.current = s;
       setSocket(s);
 

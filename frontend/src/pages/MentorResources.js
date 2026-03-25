@@ -103,11 +103,11 @@ const MentorResources = () => {
   const getResourceIcon = (type) => {
     switch(type) {
       case 'pdf':
-      case 'document': return '📄';
-      case 'video': return '🎥';
-      case 'link': return '🔗';
-      case 'audio': return '🎵';
-      default: return '📦';
+      case 'document': return '';
+      case 'video': return '';
+      case 'link': return '';
+      case 'audio': return '';
+      default: return '';
     }
   };
 
@@ -131,14 +131,14 @@ const MentorResources = () => {
       <div className="container">
         <div className="dashboard-header">
           <div>
-            <h1>📚 Share Resources</h1>
+            <h1>Share Resources</h1>
             <p className="dashboard-subtitle">Upload and manage learning materials for your mentees</p>
           </div>
           <button 
             className="btn btn-primary"
             onClick={() => setShowUploadForm(!showUploadForm)}
           >
-            {showUploadForm ? '✗ Cancel' : '+ Upload Resource'}
+            {showUploadForm ? 'Cancel' : '+ Upload Resource'}
           </button>
         </div>
 
@@ -275,7 +275,7 @@ const MentorResources = () => {
             </div>
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">📚</div>
+              <div className="empty-icon"></div>
               <h3>No resources yet</h3>
               <p>Start sharing valuable learning materials with your mentees by uploading your first resource.</p>
               <button 

@@ -9,7 +9,7 @@ const Wallet = () => {
 
   // Withdraw modal state
   const [showWithdraw, setShowWithdraw] = useState(false);
-  const [withdrawData, setWithdrawData] = useState({ amount: '', phoneNumber: '', paymentMethod: 'mtn_momo', notes: '' });
+  const [withdrawData, setWithdrawData] = useState({ amount: '', phoneNumber: '+250', paymentMethod: 'mtn_momo', notes: '' });
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const [withdrawResult, setWithdrawResult] = useState(null);
   const [error, setError] = useState('');
@@ -31,7 +31,7 @@ const Wallet = () => {
   };
 
   const openWithdraw = () => {
-    setWithdrawData({ amount: '', phoneNumber: '', paymentMethod: 'mtn_momo', notes: '' });
+    setWithdrawData({ amount: '', phoneNumber: '+250', paymentMethod: 'mtn_momo', notes: '' });
     setWithdrawResult(null);
     setShowWithdraw(true);
   };
@@ -85,7 +85,7 @@ const Wallet = () => {
           </div>
           <div className="balance-right">
             <button className="btn btn-withdraw" onClick={openWithdraw} disabled={!wallet.balance || wallet.balance <= 0}>
-              💸 Withdraw to MoMo
+              Withdraw to MoMo
             </button>
           </div>
         </div>
@@ -115,7 +115,7 @@ const Wallet = () => {
                 <div className="tx-left">
                   <div className="tx-icon tx-in">↓</div>
                   <div>
-                    <p className="tx-label">{p.paymentFor === 'course' ? '📚 Course Enrollment' : '📅 Session Booking'}</p>
+                    <p className="tx-label">{p.paymentFor === 'course' ? 'Course Enrollment' : 'Session Booking'}</p>
                     <p className="tx-sub">{p.payer?.name || 'Mentee'} · {methodLabel(p.paymentMethod)}</p>
                     <p className="tx-date">{new Date(p.createdAt).toLocaleString()}</p>
                   </div>
@@ -138,7 +138,7 @@ const Wallet = () => {
                 <div className="tx-left">
                   <div className="tx-icon tx-out">↑</div>
                   <div>
-                    <p className="tx-label">💸 Withdrawal — {methodLabel(w.paymentMethod)}</p>
+                    <p className="tx-label">Withdrawal — {methodLabel(w.paymentMethod)}</p>
                     <p className="tx-sub">{w.phoneNumber}</p>
                     <p className="tx-date">{new Date(w.createdAt).toLocaleString()}</p>
                     {w.transactionRef && <p className="tx-ref">Ref: {w.transactionRef}</p>}
@@ -160,7 +160,7 @@ const Wallet = () => {
           <div className="modal-content withdraw-modal" onClick={e => e.stopPropagation()}>
             {withdrawResult ? (
               <div className="pay-success">
-                <div className="pay-success-icon">✅</div>
+                <div className="pay-success-icon"></div>
                 <h2>Withdrawal Initiated!</h2>
                 <p>Funds will be sent to <strong>{withdrawResult.withdrawal?.phoneNumber}</strong></p>
                 <div className="pay-summary">
@@ -212,9 +212,9 @@ const Wallet = () => {
                     <input
                       type="tel"
                       className="form-control"
-                      placeholder="e.g. +224 622 000 000"
+                      placeholder="e.g. +250 788 000 000"
                       value={withdrawData.phoneNumber}
-                      onChange={e => setWithdrawData({ ...withdrawData, phoneNumber: e.target.value })}
+                      onChange={e => { if (e.target.value.startsWith('+250')) setWithdrawData({ ...withdrawData, phoneNumber: e.target.value }); }}
                       required
                     />
                   </div>

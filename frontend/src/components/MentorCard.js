@@ -20,7 +20,7 @@ const MentorCard = ({ mentor, onClick }) => {
         />
         <div className="mentor-info">
           <h3>{mentor.name}</h3>
-          <p className="mentor-location">📍 {mentor.location || 'Remote'}</p>
+          <p className="mentor-location">{mentor.location || 'Remote'}</p>
         </div>
       </div>
       
@@ -42,17 +42,17 @@ const MentorCard = ({ mentor, onClick }) => {
         
         <div className="mentor-stats">
           <div className="stat">
-            <span className="stat-icon">⭐</span>
+            <span className="stat-icon"></span>
             <span className="stat-value">{mentor.rating ? mentor.rating.toFixed(1) : 'New'}</span>
             <span className="stat-label">({mentor.totalRatings || 0})</span>
           </div>
           <div className="stat">
-            <span className="stat-icon">📚</span>
+            <span className="stat-icon"></span>
             <span className="stat-value">{mentor.completedSessions || 0}</span>
             <span className="stat-label">sessions</span>
           </div>
           <div className="stat">
-            <span className="stat-icon">💰</span>
+            <span className="stat-icon"></span>
             <span className="stat-value">{(mentor.pricePerSession || 0).toLocaleString()} RWF</span>
             <span className="stat-label">/hr</span>
           </div>

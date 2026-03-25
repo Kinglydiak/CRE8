@@ -26,7 +26,11 @@ const menteeSchema = new mongoose.Schema({
   completedSessions: {
     type: Number,
     default: 0
-  }
+  },
+  enrolledCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course'
+  }]
 });
 
 const Mentee = User.discriminator('mentee', menteeSchema);

@@ -3,6 +3,7 @@ const Mentor = require('../models/Mentor');
 const Mentee = require('../models/Mentee');
 const Payment = require('../models/Payment');
 const sendEmail = require('../utils/sendEmail');
+const { requestToPay } = require('../utils/mtnMoMo');
 
 // @desc    Create a new booking
 // @route   POST /api/bookings
@@ -68,8 +69,28 @@ const createBooking = async (req, res) => {
         status: 'pending'
       });
 
-      // Credit mentor wallet (provisional — confirmed once MTN webhook arrives)
-      await Mentor.findByIdAndUpdate(mentorId, { $inc: { walletBalance: amount } });
+      // Call MTN Collections API — send push prompt to mentee's phone
+      let momoReferenceId = transactionRef;
+      try {
+        momoReferenceId = await requestToPay({
+          amount,
+          currency: 'RWF',
+          phoneNumber,
+          externalId: transactionRef,
+          payerMessage: `CRE8 session with ${mentor.name}`,
+          payeeNote: `Booking ${booking._id}`
+        });
+        // Update payment record with MTN reference
+        await Payment.findOneAndUpdate(
+          { transactionId: transactionRef },
+          { transactionId: momoReferenceId }
+        );
+      } catch (momoErr) {
+        console.error('MTN MoMo requestToPay error:', momoErr.message);
+        // Payment record stays pending — do NOT credit wallet until confirmed
+      }
+      // NOTE: wallet credit now happens via webhook (POST /api/payments/mtn-webhook)
+      // Provisional credit removed to avoid double-crediting
     }
 
     // Populate booking details
@@ -93,7 +114,8 @@ const createBooking = async (req, res) => {
         booking,
         transactionRef,
         phoneNumber,
-        amount
+        amount,
+        momoStatus: amount > 0 ? 'prompt_sent' : 'free'
       }
     });
   } catch (error) {
