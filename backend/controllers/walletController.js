@@ -83,7 +83,22 @@ const requestWithdrawal = async (req, res) => {
       status: 'pending'
     });
 
-    // Call MTN Disbursements API to push funds to mentor's phone
+    // In sandbox, skip the real MTN Disbursements call — just mark completed immediately
+    const isSandbox = (process.env.MTN_TARGET_ENVIRONMENT || 'sandbox') === 'sandbox';
+    if (isSandbox) {
+      await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'completed' });
+      return res.status(201).json({
+        success: true,
+        message: 'Withdrawal successful. Funds have been sent to your mobile money account.',
+        data: {
+          withdrawal: { ...withdrawal.toObject(), status: 'completed' },
+          newBalance: mentor.walletBalance,
+          currency: mentor.walletCurrency || 'RWF'
+        }
+      });
+    }
+
+    // Production: Call MTN Disbursements API to push funds to mentor's phone
     let momoReferenceId = transactionRef;
     try {
       momoReferenceId = await transfer({
