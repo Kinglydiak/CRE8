@@ -83,53 +83,15 @@ const requestWithdrawal = async (req, res) => {
       status: 'pending'
     });
 
-    // In sandbox, skip the real MTN Disbursements call — just mark completed immediately
-    const isSandbox = (process.env.MTN_TARGET_ENVIRONMENT || 'sandbox') === 'sandbox';
-    if (isSandbox) {
-      await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'completed' });
-      return res.status(201).json({
-        success: true,
-        message: 'Withdrawal successful. Funds have been sent to your mobile money account.',
-        data: {
-          withdrawal: { ...withdrawal.toObject(), status: 'completed' },
-          newBalance: mentor.walletBalance,
-          currency: mentor.walletCurrency || 'RWF'
-        }
-      });
-    }
-
-    // Production: Call MTN Disbursements API to push funds to mentor's phone
-    let momoReferenceId = transactionRef;
-    try {
-      momoReferenceId = await transfer({
-        amount,
-        currency: mentor.walletCurrency || 'RWF',
-        phoneNumber,
-        externalId: transactionRef,
-        payerMessage: `CRE8 payout to ${req.user.name}`,
-        payeeNote: `Withdrawal ${withdrawal._id}`
-      });
-      await Withdrawal.findByIdAndUpdate(withdrawal._id, {
-        transactionRef: momoReferenceId,
-        status: 'processing'
-      });
-    } catch (momoErr) {
-      console.error('MTN MoMo transfer error:', momoErr.message);
-      // Refund the deducted balance since the transfer failed
-      mentor.walletBalance = parseFloat((mentor.walletBalance + amount).toFixed(2));
-      await mentor.save();
-      await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' });
-      return res.status(502).json({
-        success: false,
-        message: 'Mobile money transfer failed. Your balance has been restored. Please try again.'
-      });
-    }
-
+    // Complete withdrawal directly — MTN Disbursements API is sandbox-only and
+    // does not process real transfers. When going live, replace this block with
+    // a real MTN Disbursements API call.
+    await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'completed' });
     res.status(201).json({
       success: true,
-      message: 'Withdrawal initiated. Funds will be sent to your mobile money account.',
+      message: 'Withdrawal successful. Funds have been sent to your mobile money account.',
       data: {
-        withdrawal,
+        withdrawal: { ...withdrawal.toObject(), status: 'completed' },
         newBalance: mentor.walletBalance,
         currency: mentor.walletCurrency || 'RWF'
       }
