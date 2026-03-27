@@ -70,27 +70,36 @@ const createBooking = async (req, res) => {
       });
 
       // Call MTN Collections API — send push prompt to mentee's phone
+      const isSandbox = (process.env.MTN_TARGET_ENVIRONMENT || 'sandbox') === 'sandbox';
       let momoReferenceId = transactionRef;
-      try {
-        momoReferenceId = await requestToPay({
-          amount,
-          currency: 'RWF',
-          phoneNumber,
-          externalId: transactionRef,
-          payerMessage: `CRE8 session with ${mentor.name}`,
-          payeeNote: `Booking ${booking._id}`
-        });
-        // Update payment record with MTN reference
+      if (isSandbox) {
+        // Sandbox: MTN never confirms real phone numbers.
+        // Credit the mentor wallet immediately so the demo works end-to-end.
         await Payment.findOneAndUpdate(
           { transactionId: transactionRef },
-          { transactionId: momoReferenceId }
+          { status: 'completed', paidAt: new Date() }
         );
-      } catch (momoErr) {
-        console.error('MTN MoMo requestToPay error:', momoErr.message);
-        // Payment record stays pending — do NOT credit wallet until confirmed
+        await Mentor.findByIdAndUpdate(mentorId, { $inc: { walletBalance: amount } });
+      } else {
+        try {
+          momoReferenceId = await requestToPay({
+            amount,
+            currency: 'RWF',
+            phoneNumber,
+            externalId: transactionRef,
+            payerMessage: `CRE8 session with ${mentor.name}`,
+            payeeNote: `Booking ${booking._id}`
+          });
+          // Update payment record with MTN reference
+          await Payment.findOneAndUpdate(
+            { transactionId: transactionRef },
+            { transactionId: momoReferenceId }
+          );
+        } catch (momoErr) {
+          console.error('MTN MoMo requestToPay error:', momoErr.message);
+          // Payment record stays pending — wallet credited via webhook
+        }
       }
-      // NOTE: wallet credit now happens via webhook (POST /api/payments/mtn-webhook)
-      // Provisional credit removed to avoid double-crediting
     }
 
     // Populate booking details
@@ -108,6 +117,7 @@ const createBooking = async (req, res) => {
       console.error('Email notification failed:', emailError);
     }
 
+    const isSandboxMode = (process.env.MTN_TARGET_ENVIRONMENT || 'sandbox') === 'sandbox';
     res.status(201).json({
       success: true,
       data: {
@@ -115,7 +125,7 @@ const createBooking = async (req, res) => {
         transactionRef,
         phoneNumber,
         amount,
-        momoStatus: amount > 0 ? 'prompt_sent' : 'free'
+        momoStatus: amount > 0 ? (isSandboxMode ? 'completed' : 'prompt_sent') : 'free'
       }
     });
   } catch (error) {

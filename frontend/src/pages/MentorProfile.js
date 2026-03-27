@@ -260,17 +260,16 @@ const MentorProfile = () => {
               {payResult ? (
                 <div className="pay-success">
                   <div className="pay-success-icon"></div>
-                  <h2>Payment Initiated!</h2>
-                  <p>Approve the prompt sent to <strong>{payResult.phoneNumber}</strong></p>
+                  <h2>Enrolled Successfully!</h2>
+                  <p>Payment confirmed via MTN Mobile Money.</p>
                   <div className="pay-summary">
                     <div className="pay-row"><span>Course</span><span>{payResult.courseTitle}</span></div>
                     <div className="pay-row"><span>Amount</span><span>{payResult.amount.toLocaleString()} {payResult.currency}</span></div>
                     <div className="pay-row"><span>Reference</span><span className="tx-ref">{payResult.transactionRef}</span></div>
-                    <div className="pay-row"><span>Status</span><span className="status-pending">Pending</span></div>
+                    <div className="pay-row"><span>Status</span><span style={{color:'#10b981',fontWeight:600}}>Completed</span></div>
                   </div>
-                  <p className="pay-note">Keep this reference in case you need to follow up.</p>
                   <button className="btn btn-primary" onClick={() => { setShowPayModal(false); setPayResult(null); }}>
-                    Done
+                    Start Learning
                   </button>
                 </div>
               ) : (
@@ -284,19 +283,7 @@ const MentorProfile = () => {
                   </div>
                   <form onSubmit={handlePaySubmit}>
                     <div className="form-group">
-                      <label>Payment Method</label>
-                      <select
-                        className="form-control"
-                        value={payData.paymentMethod}
-                        onChange={e => setPayData({ ...payData, paymentMethod: e.target.value })}
-                      >
-                        <option value="mtn_momo">MTN Mobile Money</option>
-                        <option value="orange_money">Orange Money</option>
-                        <option value="moov_money">Moov Money</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label>Mobile Money Number</label>
+                      <label>MTN Mobile Money Number</label>
                       <input
                         type="tel"
                         className="form-control"
@@ -329,17 +316,16 @@ const MentorProfile = () => {
               {bookingResult ? (
                 <div className="pay-success">
                   <div className="pay-success-icon"></div>
-                  <h2>Booking & Payment Initiated!</h2>
-                  <p>Approve the MoMo prompt sent to <strong>{bookingResult.phoneNumber}</strong></p>
+                  <h2>Booking Confirmed!</h2>
+                  <p>Payment processed via MTN Mobile Money.</p>
                   <div className="pay-summary">
                     <div className="pay-row"><span>Mentor</span><span>{mentor.name}</span></div>
                     <div className="pay-row"><span>Date</span><span>{new Date(bookingResult.booking?.sessionDate).toLocaleString()}</span></div>
                     <div className="pay-row"><span>Duration</span><span>{bookingData.duration} min</span></div>
-                    <div className="pay-row"><span>Amount</span><span>${calcBookingPrice()}</span></div>
+                    <div className="pay-row"><span>Amount</span><span>{calcBookingPrice().toLocaleString()} RWF</span></div>
                     <div className="pay-row"><span>Reference</span><span className="tx-ref">{bookingResult.transactionRef}</span></div>
-                    <div className="pay-row"><span>Status</span><span className="status-pending">Pending</span></div>
+                    <div className="pay-row"><span>Status</span><span style={{color:'#10b981',fontWeight:600}}>Completed</span></div>
                   </div>
-                  <p className="pay-note">Your booking will be confirmed once payment is verified.</p>
                   <button className="btn btn-primary" onClick={() => { setShowBookingModal(false); setBookingResult(null); setBookingStep(1); navigate('/bookings'); }}>
                     View My Bookings
                   </button>
@@ -421,19 +407,7 @@ const MentorProfile = () => {
                   {mentor.pricePerSession > 0 ? (
                     <form onSubmit={handleBookingSubmit}>
                       <div className="form-group">
-                        <label>Payment Method</label>
-                        <select
-                          className="form-control"
-                          value={bookingPayData.paymentMethod}
-                          onChange={e => setBookingPayData({ ...bookingPayData, paymentMethod: e.target.value })}
-                        >
-                          <option value="mtn_momo">MTN Mobile Money</option>
-                          <option value="orange_money">Orange Money</option>
-                          <option value="moov_money">Moov Money</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label>Mobile Money Number</label>
+                        <label>MTN Mobile Money Number</label>
                         <input
                           type="tel"
                           className="form-control"

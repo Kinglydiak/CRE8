@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { getWallet, requestWithdrawal, syncPayments } from '../services/walletService';
+import { getWallet, requestWithdrawal } from '../services/walletService';
 import './Wallet.css';
 
 const Wallet = () => {
   const [wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('incoming');
-  const [syncing, setSyncing] = useState(false);
 
   // Withdraw modal state
   const [showWithdraw, setShowWithdraw] = useState(false);
@@ -28,19 +27,6 @@ const Wallet = () => {
       setError('Failed to load wallet');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSync = async () => {
-    try {
-      setSyncing(true);
-      const res = await syncPayments();
-      await fetchWallet();
-      alert(res.message || 'Sync complete');
-    } catch (err) {
-      alert('Sync failed: ' + (err.response?.data?.message || err.message));
-    } finally {
-      setSyncing(false);
     }
   };
 
@@ -95,22 +81,12 @@ const Wallet = () => {
               {(wallet.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               <span className="balance-currency"> {wallet.currency}</span>
             </h2>
-            <p className="balance-note">Earnings credit when mentees initiate payment</p>
+            <p className="balance-note">Earnings are automatically credited when mentees pay</p>
           </div>
           <div className="balance-right">
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <button className="btn btn-withdraw" onClick={openWithdraw} disabled={!wallet.balance || wallet.balance <= 0}>
-                Withdraw to MoMo
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={handleSync}
-                disabled={syncing}
-                style={{ whiteSpace: 'nowrap' }}
-              >
-                {syncing ? 'Syncing...' : '🔄 Sync Payments'}
-              </button>
-            </div>
+            <button className="btn btn-withdraw" onClick={openWithdraw} disabled={!wallet.balance || wallet.balance <= 0}>
+              Withdraw to MoMo
+            </button>
           </div>
         </div>
 
@@ -220,19 +196,7 @@ const Wallet = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Payment Method</label>
-                    <select
-                      className="form-control"
-                      value={withdrawData.paymentMethod}
-                      onChange={e => setWithdrawData({ ...withdrawData, paymentMethod: e.target.value })}
-                    >
-                      <option value="mtn_momo">MTN Mobile Money</option>
-                      <option value="orange_money">Orange Money</option>
-                      <option value="moov_money">Moov Money</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Mobile Money Number</label>
+                    <label>MTN Mobile Money Number</label>
                     <input
                       type="tel"
                       className="form-control"

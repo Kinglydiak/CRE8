@@ -124,10 +124,14 @@ const requestWithdrawal = async (req, res) => {
   }
 };
 
-// @desc    Poll MTN for all pending incoming payments and credit wallet if completed
+// @desc    Poll MTN for all pending incoming payments and credit wallet if completed.
+//          In sandbox mode, payments are approved directly (MTN sandbox never auto-approves
+//          real phone numbers, so polling would return PENDING indefinitely).
 // @route   POST /api/wallet/sync-payments
 // @access  Mentor only
 const syncPendingPayments = async (req, res) => {
+  const isSandbox = (process.env.MTN_TARGET_ENVIRONMENT || 'sandbox') === 'sandbox';
+
   try {
     const pendingPayments = await Payment.find({
       mentor: req.user._id,
@@ -139,23 +143,43 @@ const syncPendingPayments = async (req, res) => {
     }
 
     let credited = 0;
+    const details = [];
+
     for (const payment of pendingPayments) {
-      try {
-        const result = await getPaymentStatus(payment.transactionId);
-        if (result.status === 'SUCCESSFUL' && payment.status !== 'completed') {
-          payment.status = 'completed';
-          payment.paidAt = new Date();
-          await payment.save();
-          await Mentor.findByIdAndUpdate(payment.mentor, {
-            $inc: { walletBalance: payment.amount }
-          });
-          credited += payment.amount;
-        } else if (result.status === 'FAILED') {
-          payment.status = 'failed';
-          await payment.save();
+      if (isSandbox) {
+        // Sandbox: MTN never confirms real phone numbers — approve directly
+        payment.status = 'completed';
+        payment.paidAt = new Date();
+        await payment.save();
+        await Mentor.findByIdAndUpdate(payment.mentor, {
+          $inc: { walletBalance: payment.amount }
+        });
+        credited += payment.amount;
+        details.push({ id: payment._id, result: 'credited', amount: payment.amount });
+      } else {
+        // Production: poll MTN for real status
+        try {
+          const result = await getPaymentStatus(payment.transactionId);
+          if (result.status === 'SUCCESSFUL' && payment.status !== 'completed') {
+            payment.status = 'completed';
+            payment.paidAt = new Date();
+            await payment.save();
+            await Mentor.findByIdAndUpdate(payment.mentor, {
+              $inc: { walletBalance: payment.amount }
+            });
+            credited += payment.amount;
+            details.push({ id: payment._id, result: 'credited', amount: payment.amount });
+          } else if (result.status === 'FAILED') {
+            payment.status = 'failed';
+            await payment.save();
+            details.push({ id: payment._id, result: 'failed' });
+          } else {
+            details.push({ id: payment._id, result: `still_${result.status?.toLowerCase() || 'pending'}` });
+          }
+        } catch (pollErr) {
+          console.error(`[syncPendingPayments] poll failed for ${payment.transactionId}:`, pollErr.message);
+          details.push({ id: payment._id, result: 'poll_error', error: pollErr.message });
         }
-      } catch (pollErr) {
-        console.error(`[syncPendingPayments] poll failed for ${payment.transactionId}:`, pollErr.message);
       }
     }
 
@@ -165,6 +189,8 @@ const syncPendingPayments = async (req, res) => {
       credited,
       newBalance: mentor.walletBalance,
       currency: mentor.walletCurrency || 'RWF',
+      sandbox: isSandbox,
+      details,
       message: credited > 0
         ? `Wallet updated — ${credited.toLocaleString()} ${mentor.walletCurrency || 'RWF'} credited`
         : 'No newly completed payments found'

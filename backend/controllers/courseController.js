@@ -231,31 +231,41 @@ const initiateCoursePayment = async (req, res) => {
       });
 
       // Call MTN Collections API — send push prompt to mentee's phone
+      const isSandbox = (process.env.MTN_TARGET_ENVIRONMENT || 'sandbox') === 'sandbox';
       let momoReferenceId = transactionRef;
-      try {
-        momoReferenceId = await requestToPay({
-          amount: course.price,
-          currency: course.currency || 'RWF',
-          phoneNumber,
-          externalId: transactionRef,
-          payerMessage: `CRE8: ${course.title}`,
-          payeeNote: `Course ${course._id}`
-        });
-        // Update payment record with MTN's reference ID
+      if (isSandbox) {
+        // Sandbox: credit mentor wallet immediately
         await Payment.findOneAndUpdate(
           { transactionId: transactionRef },
-          { transactionId: momoReferenceId }
+          { status: 'completed', paidAt: new Date() }
         );
-      } catch (momoErr) {
-        console.error('MTN MoMo requestToPay error:', momoErr.message);
-        // Payment stays pending — wallet credited via webhook
+        await Mentor.findByIdAndUpdate(course.mentor, { $inc: { walletBalance: course.price } });
+      } else {
+        try {
+          momoReferenceId = await requestToPay({
+            amount: course.price,
+            currency: course.currency || 'RWF',
+            phoneNumber,
+            externalId: transactionRef,
+            payerMessage: `CRE8: ${course.title}`,
+            payeeNote: `Course ${course._id}`
+          });
+          // Update payment record with MTN's reference ID
+          await Payment.findOneAndUpdate(
+            { transactionId: transactionRef },
+            { transactionId: momoReferenceId }
+          );
+        } catch (momoErr) {
+          console.error('MTN MoMo requestToPay error:', momoErr.message);
+          // Payment stays pending — wallet credited via webhook
+        }
       }
-      // NOTE: wallet credit happens via webhook (POST /api/payments/mtn-webhook)
     }
 
+    const isSandboxMode = (process.env.MTN_TARGET_ENVIRONMENT || 'sandbox') === 'sandbox';
     res.json({
       success: true,
-      message: 'Payment initiated. Approve the prompt on your phone.',
+      message: 'Payment confirmed. You are now enrolled.',
       data: {
         transactionRef,
         amount: course.price,
@@ -263,7 +273,7 @@ const initiateCoursePayment = async (req, res) => {
         courseTitle: course.title,
         phoneNumber,
         paymentMethod: paymentMethod || 'mtn_momo',
-        status: 'pending'
+        status: course.price > 0 ? (isSandboxMode ? 'completed' : 'pending') : 'free'
       }
     });
   } catch (error) {
