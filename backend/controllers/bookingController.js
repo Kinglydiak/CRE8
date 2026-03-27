@@ -198,7 +198,8 @@ const updateBookingStatus = async (req, res) => {
 
     // Check authorization
     if (req.user.role !== 'admin' && booking.mentor.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Not authorized to update this booking' });
+      console.warn(`[updateBookingStatus] Access denied — booking.mentor=${booking.mentor}, req.user._id=${req.user._id}, role=${req.user.role}`);
+      return res.status(403).json({ message: 'Not authorized to update this booking — booking belongs to a different mentor' });
     }
 
     booking.status = status;

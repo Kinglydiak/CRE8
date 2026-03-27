@@ -36,8 +36,9 @@ const protect = async (req, res, next) => {
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
+      console.warn(`[authorize] Access denied — user id=${req.user._id} has role='${req.user.role}', required: [${roles.join(', ')}]`);
       return res.status(403).json({
-        message: `User role ${req.user.role} is not authorized to access this route`
+        message: `User role '${req.user.role}' is not authorized to access this route`
       });
     }
     next();

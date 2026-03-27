@@ -11,3 +11,8 @@ export const requestWithdrawal = async (data) => {
   const response = await axios.post(`${API_URL}/withdraw`, data);
   return response.data;
 };
+
+export const syncPayments = async () => {
+  const response = await axios.post(`${API_URL}/sync-payments`);
+  return response.data;
+};

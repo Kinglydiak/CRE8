@@ -55,7 +55,8 @@ const MentorBookings = () => {
       fetchBookings();
     } catch (error) {
       console.error('Failed to update booking:', error);
-      toast.error('Failed to update booking');
+      const serverMsg = error.response?.data?.message;
+      toast.error(serverMsg ? `Failed: ${serverMsg}` : 'Failed to update booking');
     } finally {
       setConfirming(false);
     }
@@ -68,7 +69,8 @@ const MentorBookings = () => {
       fetchBookings();
     } catch (error) {
       console.error('Failed to update booking:', error);
-      toast.error('Failed to update booking status');
+      const serverMsg = error.response?.data?.message;
+      toast.error(serverMsg ? `Failed: ${serverMsg}` : 'Failed to update booking status');
     }
   };
 

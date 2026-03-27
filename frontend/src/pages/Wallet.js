@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { getWallet, requestWithdrawal } from '../services/walletService';
+import { getWallet, requestWithdrawal, syncPayments } from '../services/walletService';
 import './Wallet.css';
 
 const Wallet = () => {
   const [wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('incoming');
+  const [syncing, setSyncing] = useState(false);
 
   // Withdraw modal state
   const [showWithdraw, setShowWithdraw] = useState(false);
@@ -27,6 +28,19 @@ const Wallet = () => {
       setError('Failed to load wallet');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSync = async () => {
+    try {
+      setSyncing(true);
+      const res = await syncPayments();
+      await fetchWallet();
+      alert(res.message || 'Sync complete');
+    } catch (err) {
+      alert('Sync failed: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -84,9 +98,19 @@ const Wallet = () => {
             <p className="balance-note">Earnings credit when mentees initiate payment</p>
           </div>
           <div className="balance-right">
-            <button className="btn btn-withdraw" onClick={openWithdraw} disabled={!wallet.balance || wallet.balance <= 0}>
-              Withdraw to MoMo
-            </button>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button className="btn btn-withdraw" onClick={openWithdraw} disabled={!wallet.balance || wallet.balance <= 0}>
+                Withdraw to MoMo
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={handleSync}
+                disabled={syncing}
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                {syncing ? 'Syncing...' : '🔄 Sync Payments'}
+              </button>
+            </div>
           </div>
         </div>
 

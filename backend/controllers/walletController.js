@@ -2,7 +2,7 @@ const Mentor = require('../models/Mentor');
 const Payment = require('../models/Payment');
 const Withdrawal = require('../models/Withdrawal');
 const { randomUUID } = require('crypto');
-const { transfer } = require('../utils/mtnMoMo');
+const { transfer, getPaymentStatus } = require('../utils/mtnMoMo');
 
 // @desc    Get mentor wallet (balance + history)
 // @route   GET /api/wallet
@@ -124,4 +124,54 @@ const requestWithdrawal = async (req, res) => {
   }
 };
 
-module.exports = { getWallet, requestWithdrawal };
+// @desc    Poll MTN for all pending incoming payments and credit wallet if completed
+// @route   POST /api/wallet/sync-payments
+// @access  Mentor only
+const syncPendingPayments = async (req, res) => {
+  try {
+    const pendingPayments = await Payment.find({
+      mentor: req.user._id,
+      status: 'pending'
+    });
+
+    if (!pendingPayments.length) {
+      return res.json({ success: true, credited: 0, message: 'No pending payments to sync' });
+    }
+
+    let credited = 0;
+    for (const payment of pendingPayments) {
+      try {
+        const result = await getPaymentStatus(payment.transactionId);
+        if (result.status === 'SUCCESSFUL' && payment.status !== 'completed') {
+          payment.status = 'completed';
+          payment.paidAt = new Date();
+          await payment.save();
+          await Mentor.findByIdAndUpdate(payment.mentor, {
+            $inc: { walletBalance: payment.amount }
+          });
+          credited += payment.amount;
+        } else if (result.status === 'FAILED') {
+          payment.status = 'failed';
+          await payment.save();
+        }
+      } catch (pollErr) {
+        console.error(`[syncPendingPayments] poll failed for ${payment.transactionId}:`, pollErr.message);
+      }
+    }
+
+    const mentor = await Mentor.findById(req.user._id).select('walletBalance walletCurrency');
+    res.json({
+      success: true,
+      credited,
+      newBalance: mentor.walletBalance,
+      currency: mentor.walletCurrency || 'RWF',
+      message: credited > 0
+        ? `Wallet updated — ${credited.toLocaleString()} ${mentor.walletCurrency || 'RWF'} credited`
+        : 'No newly completed payments found'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getWallet, requestWithdrawal, syncPendingPayments };
