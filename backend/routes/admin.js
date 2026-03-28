@@ -5,6 +5,8 @@ const {
   verifyMentor,
   deleteUser,
   getAnalytics,
+  getAllBookingsAdmin,
+  cancelBookingAdmin,
   getAllCoursesAdmin,
   deleteCourseAdmin,
   getAllResourcesAdmin,
@@ -20,6 +22,8 @@ router.get('/users', getAllUsers);
 router.put('/verify-mentor/:id', verifyMentor);
 router.delete('/users/:id', deleteUser);
 router.get('/analytics', getAnalytics);
+router.get('/bookings', getAllBookingsAdmin);
+router.put('/bookings/:id/cancel', cancelBookingAdmin);
 router.get('/courses', getAllCoursesAdmin);
 router.delete('/courses/:id', deleteCourseAdmin);
 router.get('/resources', getAllResourcesAdmin);

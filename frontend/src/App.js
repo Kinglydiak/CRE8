@@ -98,7 +98,7 @@ function AppContent() {
           <Route
             path="/bookings"
             element={
-              <PrivateRoute allowedRoles={['mentee', 'mentor', 'admin']}>
+              <PrivateRoute allowedRoles={['mentee', 'mentor']}>
                 <Bookings />
               </PrivateRoute>
             }
@@ -106,7 +106,7 @@ function AppContent() {
           <Route
             path="/resources"
             element={
-              <PrivateRoute allowedRoles={['mentee', 'mentor', 'admin']}>
+              <PrivateRoute allowedRoles={['mentee', 'mentor']}>
                 <Resources />
               </PrivateRoute>
             }
@@ -114,7 +114,7 @@ function AppContent() {
           <Route
             path="/messages"
             element={
-              <PrivateRoute allowedRoles={['mentee', 'mentor', 'admin']}>
+              <PrivateRoute allowedRoles={['mentee', 'mentor']}>
                 <Messages />
               </PrivateRoute>
             }

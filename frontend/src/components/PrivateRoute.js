@@ -14,7 +14,8 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" />;
+    // Send admin back to their dashboard instead of the homepage
+    return <Navigate to={user.role === 'admin' ? '/admin' : '/'} />;
   }
 
   return children;

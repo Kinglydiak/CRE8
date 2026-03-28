@@ -22,6 +22,16 @@ export const getAnalytics = async () => {
   return response.data;
 };
 
+export const getAllBookingsAdmin = async () => {
+  const response = await axios.get(`${API_URL}/bookings`);
+  return response.data;
+};
+
+export const cancelBookingAdmin = async (id) => {
+  const response = await axios.put(`${API_URL}/bookings/${id}/cancel`);
+  return response.data;
+};
+
 export const getAllCoursesAdmin = async () => {
   const response = await axios.get(`${API_URL}/courses`);
   return response.data;

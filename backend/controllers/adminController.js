@@ -114,6 +114,36 @@ const getAnalytics = async (req, res) => {
   }
 };
 
+// @desc    Get all bookings system-wide
+// @route   GET /api/admin/bookings
+// @access  Private (Admin only)
+const getAllBookingsAdmin = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate('mentee', 'name email')
+      .populate('mentor', 'name email')
+      .sort('-createdAt');
+    res.json({ success: true, count: bookings.length, data: bookings });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Cancel any booking (admin)
+// @route   PUT /api/admin/bookings/:id/cancel
+// @access  Private (Admin only)
+const cancelBookingAdmin = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    booking.status = 'cancelled';
+    await booking.save();
+    res.json({ success: true, message: 'Booking cancelled' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Get all courses (admin — includes inactive)
 // @route   GET /api/admin/courses
 // @access  Private (Admin only)
@@ -175,6 +205,8 @@ module.exports = {
   verifyMentor,
   deleteUser,
   getAnalytics,
+  getAllBookingsAdmin,
+  cancelBookingAdmin,
   getAllCoursesAdmin,
   deleteCourseAdmin,
   getAllResourcesAdmin,

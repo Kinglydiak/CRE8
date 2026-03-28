@@ -126,5 +126,16 @@
 .ad-booking-list { display: flex; flex-direction: column; gap: 8px; }
 .ad-booking-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: #f9fafb; border-radius: 8px; }
 
+/* ── Description preview ─────────────────────────────────── */
+.ad-description { margin: 3px 0 0; font-size: 0.78rem; color: #6b7280; line-height: 1.4; }
+
+/* ── View content link ───────────────────────────────────── */
+.ad-link-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  margin-top: 4px; font-size: 0.75rem; font-weight: 500;
+  color: #6366f1; text-decoration: none;
+}
+.ad-link-btn:hover { text-decoration: underline; }
+
 /* ── Empty state ─────────────────────────────────────────── */
 .ad-empty { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 0.875rem; }

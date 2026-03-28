@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import {
   getAllUsers, verifyMentor, deleteUser, getAnalytics,
+  getAllBookingsAdmin, cancelBookingAdmin,
   getAllCoursesAdmin, deleteCourseAdmin,
   getAllResourcesAdmin, deleteResourceAdmin
 } from '../services/adminService';
 import {
   MdDashboard, MdPeople, MdBook, MdFolder,
   MdVerified, MdDelete, MdSearch, MdAttachMoney,
-  MdCalendarToday, MdCheckCircle, MdTrendingUp, MdSchool
+  MdCalendarToday, MdCheckCircle, MdTrendingUp, MdSchool,
+  MdBlock, MdOpenInNew
 } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import './Dashboard.css';
 import './AdminDashboard.css';
 
 const TABS = [
-  { key: 'overview',   label: 'Overview',   icon: MdDashboard },
-  { key: 'users',      label: 'Users',       icon: MdPeople },
-  { key: 'courses',    label: 'Courses',     icon: MdBook },
-  { key: 'resources',  label: 'Resources',   icon: MdFolder },
+  { key: 'overview',   label: 'Overview',      icon: MdDashboard },
+  { key: 'users',      label: 'Users',          icon: MdPeople },
+  { key: 'bookings',   label: 'All Bookings',   icon: MdCalendarToday },
+  { key: 'courses',    label: 'Courses',        icon: MdBook },
+  { key: 'resources',  label: 'Resources',      icon: MdFolder },
 ];
 
 /* ── Confirm-delete hook ─────────────────────────────────── */
@@ -241,10 +244,14 @@ const CoursesTab = () => {
                   <td>
                     <div className="ad-course-cell">
                       {c.thumbnail && <img src={c.thumbnail} alt="" className="ad-thumb" />}
-                      <div><p className="ad-name">{c.title}</p><p className="ad-sub">{c.category}</p></div>
+                      <div>
+                        <p className="ad-name">{c.title}</p>
+                        <p className="ad-sub">{c.category}</p>
+                        {c.description && <p className="ad-description">{c.description.length > 120 ? c.description.slice(0, 120) + '…' : c.description}</p>}
+                      </div>
                     </div>
                   </td>
-                  <td className="ad-muted">{c.mentor?.name || '—'}</td>
+                  <td className="ad-muted">{c.mentor?.name || '—'}<br /><span style={{fontSize:'0.75rem',color:'#9ca3af'}}>{c.mentor?.email}</span></td>
                   <td>{c.price === 0 ? <span className="ad-badge ad-active">Free</span> : `${c.price?.toLocaleString()} ${c.currency || 'RWF'}`}</td>
                   <td className="ad-muted">{c.level || '—'}</td>
                   <td><span className={`ad-badge ${c.isActive !== false ? 'ad-verified' : 'ad-pending'}`}>{c.isActive !== false ? 'Active' : 'Inactive'}</span></td>
@@ -301,13 +308,112 @@ const ResourcesTab = () => {
             <tbody>
               {visible.map(r => (
                 <tr key={r._id}>
-                  <td><p className="ad-name">{r.title}</p><p className="ad-sub">{r.category}</p></td>
-                  <td className="ad-muted">{r.mentor?.name || '—'}</td>
+                  <td>
+                    <p className="ad-name">{r.title}</p>
+                    {r.description && <p className="ad-description">{r.description.length > 100 ? r.description.slice(0, 100) + '…' : r.description}</p>}
+                    <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="ad-link-btn">
+                      <MdOpenInNew size={12} /> View content
+                    </a>
+                  </td>
+                  <td className="ad-muted">{r.mentor?.name || '—'}<br /><span style={{fontSize:'0.75rem',color:'#9ca3af'}}>{r.mentor?.email}</span></td>
                   <td><span className="ad-type-dot" style={{ background: TYPE_COLORS[r.fileType] || '#6b7280' }}>{r.fileType}</span></td>
-                  <td className="ad-muted" style={{ fontSize: '0.8rem' }}>{r.accessLevel?.replace('_', ' ')}</td>
+                  <td className="ad-muted" style={{ fontSize: '0.8rem' }}>{r.accessLevel?.replace(/_/g, ' ')}</td>
                   <td className="ad-muted">{r.downloads || 0}</td>
                   <td className="ad-muted">{new Date(r.createdAt).toLocaleDateString()}</td>
                   <td><DeleteBtn id={r._id} pending={del.pending} ask={del.ask} cancel={del.cancel} onConfirm={handleDelete} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ════════════════════════════════════════════════════════════
+   BOOKINGS TAB
+════════════════════════════════════════════════════════════ */
+const STATUS_FILTERS = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+
+const BookingsTab = () => {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const confirm = useConfirm();
+
+  useEffect(() => {
+    getAllBookingsAdmin()
+      .then(r => setBookings(r.data))
+      .catch(() => toast.error('Failed to load bookings'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleCancel = async (id) => {
+    try {
+      await cancelBookingAdmin(id);
+      setBookings(p => p.map(b => b._id === id ? { ...b, status: 'cancelled' } : b));
+      toast.success('Booking cancelled');
+    } catch { toast.error('Failed to cancel booking'); }
+    finally { confirm.cancel(); }
+  };
+
+  const visible = bookings.filter(b => {
+    if (statusFilter !== 'all' && b.status !== statusFilter) return false;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      return b.mentee?.name?.toLowerCase().includes(q) ||
+             b.mentor?.name?.toLowerCase().includes(q) ||
+             b.topic?.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  if (loading) return <div className="spinner" style={{ margin: '60px auto' }} />;
+
+  return (
+    <div className="ad-tab-content">
+      <div className="ad-filters">
+        <div className="ad-search"><MdSearch className="ad-search-icon" /><input placeholder="Search by mentee, mentor, or topic…" value={search} onChange={e => setSearch(e.target.value)} /></div>
+        <div className="ad-role-tabs">
+          {STATUS_FILTERS.map(s => (
+            <button key={s} className={`ad-role-tab${statusFilter === s ? ' active' : ''}`} onClick={() => setStatusFilter(s)}>
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+        </div>
+        <span className="ad-count">{visible.length} booking{visible.length !== 1 ? 's' : ''}</span>
+      </div>
+      {!visible.length ? <p className="ad-empty">No bookings found</p> : (
+        <div className="ad-table-wrap">
+          <table className="ad-table">
+            <thead><tr><th>Mentee</th><th>Mentor</th><th>Topic / Notes</th><th>Date</th><th>Duration</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              {visible.map(b => (
+                <tr key={b._id}>
+                  <td><div className="ad-user-cell"><div className="ad-avatar">{b.mentee?.name?.charAt(0).toUpperCase()}</div><div><p className="ad-name">{b.mentee?.name || '—'}</p><p className="ad-sub">{b.mentee?.email}</p></div></div></td>
+                  <td><div className="ad-user-cell"><div className="ad-avatar" style={{background:'#ede9fe',color:'#7c3aed'}}>{b.mentor?.name?.charAt(0).toUpperCase()}</div><div><p className="ad-name">{b.mentor?.name || '—'}</p><p className="ad-sub">{b.mentor?.email}</p></div></div></td>
+                  <td>
+                    <p className="ad-name" style={{fontWeight:500}}>{b.topic || <span className="ad-muted">No topic</span>}</p>
+                    {b.notes && <p className="ad-description">{b.notes.length > 80 ? b.notes.slice(0,80)+'…' : b.notes}</p>}
+                  </td>
+                  <td className="ad-muted">{new Date(b.sessionDate).toLocaleString()}</td>
+                  <td className="ad-muted">{b.duration} min</td>
+                  <td><span className={`ad-badge ad-status-${b.status}`}>{b.status}</span></td>
+                  <td>
+                    {b.status !== 'cancelled' && b.status !== 'completed' && (
+                      confirm.pending === b._id ? (
+                        <span className="ad-confirm-row">
+                          <span>Cancel?</span>
+                          <button className="ad-btn-yes" onClick={() => handleCancel(b._id)}>Yes</button>
+                          <button className="ad-btn-no" onClick={confirm.cancel}>No</button>
+                        </span>
+                      ) : (
+                        <button className="ad-btn-icon ad-btn-delete" onClick={() => confirm.ask(b._id)} title="Cancel booking"><MdBlock size={15} /></button>
+                      )
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -336,7 +442,7 @@ const AdminDashboard = () => {
       <div className="db-topbar">
         <div>
           <h1 className="db-page-title">Admin Dashboard</h1>
-          <p className="db-page-sub">Manage users, courses, and resources across the platform</p>
+          <p className="db-page-sub">System-wide oversight — users, bookings, courses, and resources</p>
         </div>
       </div>
 
@@ -355,6 +461,7 @@ const AdminDashboard = () => {
 
       {tab === 'overview'  && <OverviewTab data={analytics} />}
       {tab === 'users'     && <UsersTab />}
+      {tab === 'bookings'  && <BookingsTab />}
       {tab === 'courses'   && <CoursesTab />}
       {tab === 'resources' && <ResourcesTab />}
     </div>
