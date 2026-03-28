@@ -1,0 +1,130 @@
+/* ── Tabs ─────────────────────────────────────────────────── */
+.ad-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 32px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+.ad-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 18px;
+  border: none;
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ad-tab:hover { color: #374151; }
+.ad-tab.active { color: #6366f1; border-bottom-color: #6366f1; font-weight: 600; }
+
+/* ── Tab content wrapper ─────────────────────────────────── */
+.ad-tab-content { padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Stats grid ──────────────────────────────────────────── */
+.ad-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+}
+.ad-stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ad-stat-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ad-stat-label { margin: 0; font-size: 0.75rem; color: #6b7280; font-weight: 500; }
+.ad-stat-value { margin: 4px 0 0; font-size: 1.4rem; font-weight: 800; color: #111827; line-height: 1; }
+
+/* ── Card ────────────────────────────────────────────────── */
+.ad-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; }
+.ad-card-header { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.875rem; color: #374151; margin-bottom: 12px; }
+.ad-rate { margin-left: auto; font-size: 1.05rem; font-weight: 800; color: #10b981; }
+.ad-progress-track { height: 8px; background: #f3f4f6; border-radius: 8px; overflow: hidden; }
+.ad-progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #6366f1); border-radius: 8px; transition: width 0.6s ease; }
+.ad-progress-sub { margin: 8px 0 0; font-size: 0.775rem; color: #9ca3af; }
+
+/* ── Two column ──────────────────────────────────────────── */
+.ad-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 768px) { .ad-two-col { grid-template-columns: 1fr; } }
+
+/* ── Filters ─────────────────────────────────────────────── */
+.ad-filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ad-search { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
+.ad-search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 17px; }
+.ad-search input { width: 100%; padding: 8px 12px 8px 34px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.875rem; background: #fff; outline: none; box-sizing: border-box; }
+.ad-search input:focus { border-color: #6366f1; }
+.ad-role-tabs { display: flex; gap: 5px; }
+.ad-role-tab { padding: 6px 13px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; font-size: 0.8rem; font-weight: 500; cursor: pointer; color: #6b7280; transition: all 0.15s; }
+.ad-role-tab.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+.ad-count { font-size: 0.825rem; color: #9ca3af; white-space: nowrap; }
+
+/* ── Table ───────────────────────────────────────────────── */
+.ad-table-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: auto; }
+.ad-table { width: 100%; border-collapse: collapse; font-size: 0.855rem; }
+.ad-table th { padding: 11px 14px; text-align: left; font-size: 0.72rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #f3f4f6; background: #f9fafb; }
+.ad-table td { padding: 12px 14px; border-bottom: 1px solid #f3f4f6; color: #111827; }
+.ad-table tbody tr:last-child td { border-bottom: none; }
+.ad-table tbody tr:hover td { background: #fafafa; }
+
+/* ── Shared cell helpers ─────────────────────────────────── */
+.ad-user-cell { display: flex; align-items: center; gap: 10px; }
+.ad-avatar { width: 30px; height: 30px; border-radius: 50%; background: #e0e7ff; color: #6366f1; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ad-name  { margin: 0; font-size: 0.855rem; font-weight: 600; color: #111827; }
+.ad-sub   { margin: 2px 0 0; font-size: 0.75rem; color: #9ca3af; }
+.ad-muted { color: #6b7280; font-size: 0.84rem; }
+.ad-rating { color: #f59e0b; font-weight: 700; }
+.ad-section-title { margin: 0 0 14px; font-size: 0.925rem; font-weight: 700; color: #111827; }
+
+/* ── Badges ──────────────────────────────────────────────── */
+.ad-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; text-transform: capitalize; }
+.ad-role-mentor   { background: #ede9fe; color: #7c3aed; }
+.ad-role-mentee   { background: #dbeafe; color: #1d4ed8; }
+.ad-role-admin    { background: #fef3c7; color: #d97706; }
+.ad-verified      { background: #d1fae5; color: #065f46; }
+.ad-pending       { background: #fef9c3; color: #a16207; }
+.ad-active        { background: #f3f4f6; color: #374151; }
+.ad-status-completed { background: #d1fae5; color: #065f46; }
+.ad-status-pending   { background: #fef9c3; color: #a16207; }
+.ad-status-confirmed { background: #dbeafe; color: #1d4ed8; }
+.ad-status-cancelled { background: #fee2e2; color: #991b1b; }
+
+/* ── Actions ─────────────────────────────────────────────── */
+.ad-actions { display: flex; align-items: center; gap: 6px; }
+.ad-btn-verify { display: flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 6px; border: 1px solid #10b981; background: #fff; color: #10b981; font-size: 0.775rem; font-weight: 600; cursor: pointer; }
+.ad-btn-verify:hover { background: #d1fae5; }
+.ad-btn-icon { display: flex; align-items: center; justify-content: center; padding: 5px 8px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; }
+.ad-btn-delete { border-color: #fca5a5; color: #ef4444; }
+.ad-btn-delete:hover { background: #fee2e2; }
+.ad-confirm-row { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; white-space: nowrap; }
+.ad-btn-yes { padding: 3px 9px; border-radius: 6px; border: none; background: #ef4444; color: #fff; font-size: 0.775rem; font-weight: 600; cursor: pointer; }
+.ad-btn-no  { padding: 3px 9px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #374151; font-size: 0.775rem; cursor: pointer; }
+
+/* ── Course cell ─────────────────────────────────────────── */
+.ad-course-cell { display: flex; align-items: center; gap: 10px; }
+.ad-thumb { width: 44px; height: 30px; border-radius: 5px; object-fit: cover; flex-shrink: 0; background: #f3f4f6; }
+
+/* ── Resource type dot ───────────────────────────────────── */
+.ad-type-dot { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; color: #fff; }
+
+/* ── Booking list in overview ────────────────────────────── */
+.ad-booking-list { display: flex; flex-direction: column; gap: 8px; }
+.ad-booking-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: #f9fafb; border-radius: 8px; }
+
+/* ── Empty state ─────────────────────────────────────────── */
+.ad-empty { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 0.875rem; }

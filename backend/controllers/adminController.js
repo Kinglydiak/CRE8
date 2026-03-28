@@ -2,6 +2,8 @@ const User = require('../models/User');
 const Mentor = require('../models/Mentor');
 const Booking = require('../models/Booking');
 const Payment = require('../models/Payment');
+const Course = require('../models/Course');
+const Resource = require('../models/Resource');
 
 // @desc    Get all users
 // @route   GET /api/admin/users
@@ -112,9 +114,69 @@ const getAnalytics = async (req, res) => {
   }
 };
 
+// @desc    Get all courses (admin — includes inactive)
+// @route   GET /api/admin/courses
+// @access  Private (Admin only)
+const getAllCoursesAdmin = async (req, res) => {
+  try {
+    const courses = await Course.find()
+      .populate('mentor', 'name email')
+      .sort('-createdAt');
+    res.json({ success: true, count: courses.length, data: courses });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete any course
+// @route   DELETE /api/admin/courses/:id
+// @access  Private (Admin only)
+const deleteCourseAdmin = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    await course.deleteOne();
+    res.json({ success: true, message: 'Course deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all resources (admin)
+// @route   GET /api/admin/resources
+// @access  Private (Admin only)
+const getAllResourcesAdmin = async (req, res) => {
+  try {
+    const resources = await Resource.find()
+      .populate('mentor', 'name email')
+      .sort('-createdAt');
+    res.json({ success: true, count: resources.length, data: resources });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete any resource
+// @route   DELETE /api/admin/resources/:id
+// @access  Private (Admin only)
+const deleteResourceAdmin = async (req, res) => {
+  try {
+    const resource = await Resource.findById(req.params.id);
+    if (!resource) return res.status(404).json({ message: 'Resource not found' });
+    await resource.deleteOne();
+    res.json({ success: true, message: 'Resource deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   verifyMentor,
   deleteUser,
-  getAnalytics
+  getAnalytics,
+  getAllCoursesAdmin,
+  deleteCourseAdmin,
+  getAllResourcesAdmin,
+  deleteResourceAdmin
 };

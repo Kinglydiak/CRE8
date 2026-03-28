@@ -4,7 +4,11 @@ const {
   getAllUsers,
   verifyMentor,
   deleteUser,
-  getAnalytics
+  getAnalytics,
+  getAllCoursesAdmin,
+  deleteCourseAdmin,
+  getAllResourcesAdmin,
+  deleteResourceAdmin
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -16,5 +20,9 @@ router.get('/users', getAllUsers);
 router.put('/verify-mentor/:id', verifyMentor);
 router.delete('/users/:id', deleteUser);
 router.get('/analytics', getAnalytics);
+router.get('/courses', getAllCoursesAdmin);
+router.delete('/courses/:id', deleteCourseAdmin);
+router.get('/resources', getAllResourcesAdmin);
+router.delete('/resources/:id', deleteResourceAdmin);
 
 module.exports = router;

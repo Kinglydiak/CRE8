@@ -5,6 +5,7 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
+const Admin = require('./models/Admin');
 const errorHandler = require('./middleware/error');
 
 // Initialize app
@@ -32,8 +33,19 @@ const io = new Server(server, {
 // Make io accessible from controllers
 app.set('io', io);
 
-// Connect to database
-connectDB();
+// Connect to database then ensure admin account exists
+connectDB().then(async () => {
+  const exists = await Admin.findOne({ role: 'admin' });
+  if (!exists) {
+    await Admin.create({
+      name: 'Admin',
+      email: 'admin@cre8.com',
+      password: 'Admin@1234',
+      role: 'admin'
+    });
+    console.log('Default admin created: admin@cre8.com / Admin@1234 — change the password after first login');
+  }
+});
 
 // Middleware
 app.use(cors(corsOptions));

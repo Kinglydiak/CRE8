@@ -27,8 +27,7 @@ const menteeLinks = [
 ];
 
 const adminLinks = [
-  { to: '/admin/analytics', icon: MdBarChart, label: 'Analytics' },
-  { to: '/admin/users', icon: MdPeople, label: 'Users' },
+  { to: '/admin', icon: MdDashboard, label: 'Admin Dashboard' },
 ];
 
 const Sidebar = ({ collapsed, onToggle }) => {

@@ -35,7 +35,7 @@ The platform addresses the struggle of emerging creatives, students, and entrepr
 - **Analytics Dashboard**: View platform statistics and insights
 - **Content Moderation**: Monitor and manage platform content
 
-> **Admin account**: There is no public registration for admins. Run `npm run seed:admin` inside `backend/` to create the first admin account (`admin@cre8.com` / `Admin@1234`). Change the password after first login.
+> **Admin account**: There is no public registration for admins. The server automatically creates a default admin on first startup (`admin@cre8.com` / `Admin@1234`). Change the password after first login.
 
 ## Technology Stack
 
@@ -245,12 +245,7 @@ npm run seed:mentors
 
 # Larger seed (expanded mentor profiles)
 npm run seed:expanded
-
-# Create the first admin account (email: admin@cre8.com, password: Admin@1234)
-npm run seed:admin
 ```
-
-> Change the admin password immediately after first login.
 
 ---
 
