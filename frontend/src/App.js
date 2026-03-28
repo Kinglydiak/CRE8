@@ -31,6 +31,8 @@ import MyCourses from './pages/MyCourses';
 import CoursePlayer from './pages/CoursePlayer';
 import MentorCourses from './pages/MentorCourses';
 import MentorCourseEditor from './pages/MentorCourseEditor';
+import AdminUsers from './pages/AdminUsers';
+import AdminAnalytics from './pages/AdminAnalytics';
 import './App.css';
 
 // Inner layout component that has access to AuthContext
@@ -196,6 +198,22 @@ function AppContent() {
             element={
               <PrivateRoute allowedRoles={['mentee']}>
                 <MenteeSettings />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <PrivateRoute allowedRoles={['admin']}>
+                <AdminUsers />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/analytics"
+            element={
+              <PrivateRoute allowedRoles={['admin']}>
+                <AdminAnalytics />
               </PrivateRoute>
             }
           />

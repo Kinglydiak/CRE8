@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   MdDashboard, MdCalendarToday, MdMessage, MdBook,
   MdFolder, MdSettings, MdLogout, MdAccountBalanceWallet,
-  MdPeople, MdMenu, MdClose
+  MdPeople, MdMenu, MdClose, MdBarChart
 } from 'react-icons/md';
 import AuthContext from '../context/AuthContext';
 import './Sidebar.css';
@@ -26,6 +26,11 @@ const menteeLinks = [
   { to: '/messages', icon: MdMessage, label: 'Messages' },
 ];
 
+const adminLinks = [
+  { to: '/admin/analytics', icon: MdBarChart, label: 'Analytics' },
+  { to: '/admin/users', icon: MdPeople, label: 'Users' },
+];
+
 const Sidebar = ({ collapsed, onToggle }) => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -35,8 +40,8 @@ const Sidebar = ({ collapsed, onToggle }) => {
     navigate('/login');
   };
 
-  const links = user?.role === 'mentor' ? mentorLinks : menteeLinks;
-  const settingsPath = user?.role === 'mentor' ? '/mentor/profile' : '/mentee/settings';
+  const links = user?.role === 'mentor' ? mentorLinks : user?.role === 'admin' ? adminLinks : menteeLinks;
+  const settingsPath = user?.role === 'mentor' ? '/mentor/profile' : user?.role === 'admin' ? null : '/mentee/settings';
 
   return (
     <>
@@ -83,14 +88,16 @@ const Sidebar = ({ collapsed, onToggle }) => {
         </nav>
 
         <div className="sidebar-bottom">
-          <NavLink
-            to={settingsPath}
-            className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
-            title={collapsed ? 'Settings' : undefined}
-          >
-            <span className="sidebar-icon"><MdSettings /></span>
-            {!collapsed && <span className="sidebar-label">Settings</span>}
-          </NavLink>
+          {settingsPath && (
+            <NavLink
+              to={settingsPath}
+              className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+              title={collapsed ? 'Settings' : undefined}
+            >
+              <span className="sidebar-icon"><MdSettings /></span>
+              {!collapsed && <span className="sidebar-label">Settings</span>}
+            </NavLink>
+          )}
           <button className="sidebar-link sidebar-logout-btn" onClick={handleLogout} title={collapsed ? 'Logout' : undefined}>
             <span className="sidebar-icon"><MdLogout /></span>
             {!collapsed && <span className="sidebar-label">Logout</span>}

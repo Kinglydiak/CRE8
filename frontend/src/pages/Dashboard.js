@@ -18,6 +18,8 @@ const Dashboard = () => {
     return <Navigate to="/mentor/dashboard" />;
   } else if (user.role === 'mentee') {
     return <Navigate to="/mentee/dashboard" />;
+  } else if (user.role === 'admin') {
+    return <Navigate to="/admin/analytics" />;
   } else {
     return <Navigate to="/" />;
   }

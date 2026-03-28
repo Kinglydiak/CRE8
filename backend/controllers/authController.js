@@ -18,6 +18,11 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Admin accounts cannot be self-registered — use `node seedAdmin.js` to create one
+    if (role === 'admin') {
+      return res.status(403).json({ message: 'Admin accounts cannot be self-registered' });
+    }
+
     // Create user based on role
     let user;
     if (role === 'mentor') {
@@ -26,13 +31,6 @@ const registerUser = async (req, res) => {
         email,
         password,
         role: 'mentor'
-      });
-    } else if (role === 'admin') {
-      user = await Admin.create({
-        name,
-        email,
-        password,
-        role: 'admin'
       });
     } else {
       user = await Mentee.create({

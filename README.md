@@ -35,6 +35,8 @@ The platform addresses the struggle of emerging creatives, students, and entrepr
 - **Analytics Dashboard**: View platform statistics and insights
 - **Content Moderation**: Monitor and manage platform content
 
+> **Admin account**: There is no public registration for admins. Run `npm run seed:admin` inside `backend/` to create the first admin account (`admin@cre8.com` / `Admin@1234`). Change the password after first login.
+
 ## Technology Stack
 
 ### Backend
@@ -51,148 +53,247 @@ The platform addresses the struggle of emerging creatives, students, and entrepr
 - **HTTP Client**: Axios
 - **Styling**: CSS3 with responsive design
 
-### Development Model
-**Agile Model**: The project uses Agile methodology to allow for constant feedback and flexibility to meet user needs.
-
 ## Project Structure
 
 ```
 CRE8/
 ├── backend/
 │   ├── config/
-│   │   └── db.js              # Database configuration
-│   ├── controllers/           # Request handlers
+│   │   └── db.js
+│   ├── controllers/
 │   │   ├── authController.js
 │   │   ├── mentorController.js
+│   │   ├── menteeController.js (via routes/mentees.js)
 │   │   ├── bookingController.js
+│   │   ├── courseController.js
 │   │   ├── messageController.js
 │   │   ├── resourceController.js
+│   │   ├── paymentController.js
+│   │   ├── walletController.js
 │   │   └── adminController.js
-│   ├── middleware/            # Custom middleware
-│   │   ├── auth.js           # Authentication middleware
-│   │   └── error.js          # Error handler
-│   ├── models/               # Database models
+│   ├── middleware/
+│   │   ├── auth.js
+│   │   └── error.js
+│   ├── models/
 │   │   ├── User.js
 │   │   ├── Mentor.js
 │   │   ├── Mentee.js
 │   │   ├── Admin.js
 │   │   ├── Booking.js
+│   │   ├── Course.js
 │   │   ├── Payment.js
 │   │   ├── Message.js
 │   │   ├── Resource.js
-│   │   └── Session.js
-│   ├── routes/               # API routes
+│   │   ├── Session.js
+│   │   └── Withdrawal.js
+│   ├── routes/
 │   │   ├── auth.js
 │   │   ├── mentors.js
+│   │   ├── mentees.js
 │   │   ├── bookings.js
+│   │   ├── courses.js
 │   │   ├── messages.js
 │   │   ├── resources.js
+│   │   ├── payments.js
+│   │   ├── wallet.js
+│   │   ├── upload.js
 │   │   └── admin.js
-│   ├── utils/                # Utility functions
+│   ├── utils/
 │   │   ├── generateToken.js
-│   │   └── sendEmail.js
-│   ├── .env.example          # Environment variables template
-│   ├── server.js             # Server entry point
+│   │   ├── sendEmail.js
+│   │   └── mtnMoMo.js
+│   ├── .env.example          # Copy this to .env and fill in your values
+│   ├── server.js
 │   └── package.json
 │
 ├── frontend/
-│   ├── public/
-│   │   └── index.html
 │   ├── src/
-│   │   ├── components/       # Reusable components
-│   │   │   ├── Navbar.js
-│   │   │   ├── PrivateRoute.js
-│   │   │   └── MentorCard.js
-│   │   ├── context/          # React Context
-│   │   │   └── AuthContext.js
-│   │   ├── pages/            # Page components
-│   │   │   ├── Home.js
-│   │   │   ├── Login.js
-│   │   │   ├── Register.js
-│   │   │   ├── Mentors.js
-│   │   │   ├── MentorProfile.js
-│   │   │   └── Bookings.js
-│   │   ├── services/         # API service functions
-│   │   │   ├── authService.js
-│   │   │   ├── mentorService.js
-│   │   │   ├── bookingService.js
-│   │   │   └── messageService.js
-│   │   ├── App.js            # Main App component
-│   │   ├── index.js          # Entry point
-│   │   └── index.css         # Global styles
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   └── services/
+│   ├── vite.config.js
 │   └── package.json
 │
-└── package.json              # Root package.json
+└── package.json
 ```
 
-## Installation & Setup
+## Local Setup Guide
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (local or cloud instance)
-- npm or yarn
 
-### Backend Setup
+Make sure the following are installed on your machine before you begin:
 
-1. Navigate to the backend directory:
+| Tool | Version | Notes |
+|------|---------|-------|
+| [Node.js](https://nodejs.org/) | v18 or higher | Includes npm |
+| [MongoDB](https://www.mongodb.com/try/download/community) | v6+ | Community Edition or use [MongoDB Atlas](https://www.mongodb.com/atlas) (cloud) |
+| [Git](https://git-scm.com/) | any | For cloning the repository |
+
+You will also need free accounts on:
+- **[Cloudinary](https://cloudinary.com/)** — required for avatar, thumbnail, and video uploads
+- **[MTN MoMo Developer](https://momodeveloper.mtn.com/)** *(optional)* — only required if testing payments
+
+---
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd CRE8
+```
+
+---
+
+### 2. Install All Dependencies
+
+From the project root, run the convenience script that installs dependencies for the root, backend, and frontend in one step:
+
+```bash
+npm run install-all
+```
+
+Alternatively, install each manually:
+
+```bash
+# Root
+npm install
+
+# Backend
+cd backend && npm install
+
+# Frontend
+cd ../frontend && npm install
+```
+
+---
+
+### 3. Configure Environment Variables
+
 ```bash
 cd backend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create a `.env` file based on `.env.example`:
-```bash
 cp .env.example .env
 ```
 
-4. Configure environment variables in `.env`:
-```
-PORT=5000
+Open `backend/.env` and fill in the required values:
+
+```env
+# Port must match the proxy target in frontend/vite.config.js
+PORT=5001
+
 MONGODB_URI=mongodb://localhost:27017/cre8
-JWT_SECRET=your_jwt_secret_key
+JWT_SECRET=replace_with_a_strong_secret   # generate one: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+# CORS — must match the Vite dev server URL
+FRONTEND_URL=http://localhost:3000
+
+# Email — booking and session notifications
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your_email@gmail.com
-EMAIL_PASSWORD=your_email_password
+EMAIL_PASSWORD=your_gmail_app_password
+
+# Cloudinary — get these from your Cloudinary Dashboard
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# MTN MoMo — run `node provisionMTN.js` after setting subscription keys
+MTN_SUBSCRIPTION_KEY=your_collections_subscription_key
+MTN_DISBURSEMENTS_SUBSCRIPTION_KEY=your_disbursements_subscription_key
+MTN_USER_ID=your_provisioned_user_id
+MTN_API_KEY=your_provisioned_api_key
+MTN_TARGET_ENVIRONMENT=sandbox
+MTN_BASE_URL=https://sandbox.momodeveloper.mtn.com
+MTN_CALLBACK_URL=http://localhost:5001/api/payments/mtn-webhook
 ```
 
-5. Start the backend server:
+> **Gmail tip**: Use an [App Password](https://support.google.com/accounts/answer/185833) instead of your real password when 2FA is enabled.
+
+> **MTN MoMo tip**: If you need to test payments, run `node provisionMTN.js` inside the `backend/` folder after filling in the subscription keys to auto-generate `MTN_USER_ID` and `MTN_API_KEY`.
+
+---
+
+### 4. Start MongoDB
+
+If using a **local MongoDB** instance, make sure the `mongod` service is running:
+
 ```bash
-npm start
+# macOS (Homebrew)
+brew services start mongodb-community
+
+# Ubuntu/Debian
+sudo systemctl start mongod
+
+# Windows — start from Services or run:
+# "C:\Program Files\MongoDB\Server\<version>\bin\mongod.exe"
 ```
 
-The backend will run on `http://localhost:5000`
+If using **MongoDB Atlas**, replace `MONGODB_URI` with your Atlas connection string (includes username/password).
 
-### Frontend Setup
+---
 
-1. Navigate to the frontend directory:
+### 5. (Optional) Seed the Database
+
+To populate the database with sample mentor data for development:
+
 ```bash
+cd backend
+
+# Small seed (basic mentors)
+npm run seed:mentors
+
+# Larger seed (expanded mentor profiles)
+npm run seed:expanded
+
+# Create the first admin account (email: admin@cre8.com, password: Admin@1234)
+npm run seed:admin
+```
+
+> Change the admin password immediately after first login.
+
+---
+
+### 6. Run the Application
+
+**Option A — Run both servers together (recommended):**
+
+```bash
+# From the project root
+npm run dev
+```
+
+This uses `concurrently` to start both the backend and frontend simultaneously.
+
+**Option B — Run servers separately:**
+
+```bash
+# Terminal 1 — Backend (with auto-reload)
+cd backend
+npm run dev       # uses nodemon
+
+# Terminal 2 — Frontend
 cd frontend
+npm run dev       # uses Vite
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:5001 |
+| API Health Check | http://localhost:5001/api/health |
 
-3. Start the development server:
-```bash
-npm start
-```
+---
 
-The frontend will run on `http://localhost:3000`
+### Troubleshooting
 
-### Running Both Concurrently
-
-From the root directory:
-```bash
-npm run install-all  # Install all dependencies
-npm run dev          # Run both frontend and backend
-```
+| Problem | Fix |
+|---------|-----|
+| `ECONNREFUSED` on startup | MongoDB is not running — see Step 4 |
+| API requests fail in browser | Ensure backend is on port **5001** (the Vite proxy forwards `/api` to `localhost:5001`) |
+| File uploads fail | Verify all three Cloudinary env vars are set correctly |
+| Emails not sending | Use a Gmail App Password, not your account password |
+| `nodemon` not found | Run `npm install` inside the `backend/` directory |
 
 ## API Endpoints
 
@@ -228,6 +329,36 @@ npm run dev          # Run both frontend and backend
 - `GET /api/resources/mentor/:mentorId` - Get mentor's resources
 - `GET /api/resources/:id` - Get single resource
 - `DELETE /api/resources/:id` - Delete resource
+
+### Mentees
+- `GET /api/mentees/my-courses` - Get enrolled courses
+- `PUT /api/mentees/profile` - Update mentee profile
+
+### Courses
+- `GET /api/courses` - Get all courses
+- `GET /api/courses/:id` - Get single course
+- `GET /api/courses/mentor/:mentorId` - Get courses by mentor
+- `GET /api/courses/mine` - Get mentor's own courses
+- `GET /api/courses/:id/content` - Get course content (enrolled users)
+- `POST /api/courses` - Create course
+- `PUT /api/courses/:id` - Update course
+- `DELETE /api/courses/:id` - Delete course
+- `POST /api/courses/:id/pay` - Initiate course payment
+
+### Wallet
+- `GET /api/wallet` - Get mentor wallet
+- `POST /api/wallet/withdraw` - Request withdrawal
+- `POST /api/wallet/sync-payments` - Sync pending payments
+
+### Payments
+- `POST /api/payments/mtn-webhook` - MTN MoMo webhook
+- `GET /api/payments/status/:referenceId` - Poll payment status
+- `GET /api/payments/transfer-status/:referenceId` - Poll transfer status
+
+### Upload
+- `POST /api/upload/avatar` - Upload profile avatar
+- `POST /api/upload/course-thumbnail` - Upload course thumbnail
+- `POST /api/upload/course-video` - Upload course video
 
 ### Admin
 - `GET /api/admin/users` - Get all users
@@ -266,14 +397,11 @@ npm run dev          # Run both frontend and backend
 
 ## Future Enhancements
 
-- Payment gateway integration (Stripe, PayPal, Mobile Money)
-- Real-time messaging with Socket.io
-- Video session integration (Zoom, Google Meet)
+- Video session integration (Zoom / Google Meet embed)
 - Mobile app (React Native)
 - Multi-language support (French, Swahili)
 - Advanced analytics and reporting
 - Automated mentor matching algorithm
-- Course marketplace
 - Community forums
 
 ## Contributing
@@ -289,11 +417,6 @@ MIT
 **Diakite Muheto Mohamed**  
 African Leadership University  
 January 2026
-
-## References
-
-- African Development Bank. (2023). African economic outlook 2023: Mobilizing private sector financing for climate and green growth in Africa.
-- UNESCO. (2022). Re|Shaping policies for creativity: Addressing culture as a global public good.
 
 ## Support
 
