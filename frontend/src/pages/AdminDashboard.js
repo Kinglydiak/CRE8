@@ -9,9 +9,10 @@ import {
   MdDashboard, MdPeople, MdBook, MdFolder,
   MdVerified, MdDelete, MdSearch, MdAttachMoney,
   MdCalendarToday, MdCheckCircle, MdTrendingUp, MdSchool,
-  MdBlock, MdOpenInNew
+  MdBlock, MdOpenInNew, MdVisibility, MdClose, MdPlayCircleFilled, MdDescription
 } from 'react-icons/md';
 import { toast } from 'react-toastify';
+import { getCourseContent } from '../services/courseService';
 import './Dashboard.css';
 import './AdminDashboard.css';
 
@@ -203,12 +204,118 @@ const UsersTab = () => {
 };
 
 /* ════════════════════════════════════════════════════════════
+   COURSE INSPECTOR MODAL
+════════════════════════════════════════════════════════════ */
+const toEmbedUrl = (url) => {
+  if (!url) return null;
+  if (url.includes('/embed/')) return url;
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+  if (match) return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1`;
+  return url;
+};
+
+const CourseInspectorModal = ({ course, onClose }) => {
+  const [full, setFull] = useState(null);
+  const [loadingContent, setLoadingContent] = useState(true);
+  const [activeLesson, setActiveLesson] = useState(null);
+
+  useEffect(() => {
+    getCourseContent(course._id)
+      .then(r => {
+        setFull(r.data);
+        const firstLesson = r.data.modules?.[0]?.lessons?.[0];
+        if (firstLesson) setActiveLesson(firstLesson);
+      })
+      .catch(() => toast.error('Failed to load course content'))
+      .finally(() => setLoadingContent(false));
+  }, [course._id]);
+
+  const isYoutube = activeLesson?.videoUrl && /youtube\.com|youtu\.be/.test(activeLesson.videoUrl);
+  const isLocal = activeLesson?.videoUrl && !isYoutube;
+
+  return (
+    <div className="ad-modal-overlay" onClick={onClose}>
+      <div className="ad-modal" onClick={e => e.stopPropagation()}>
+        <div className="ad-modal-header">
+          <div>
+            <h2 className="ad-modal-title">{course.title}</h2>
+            <p className="ad-modal-sub">{course.category} &middot; {course.level} &middot; by {course.mentor?.name}</p>
+          </div>
+          <button className="ad-modal-close" onClick={onClose}><MdClose size={22} /></button>
+        </div>
+
+        {loadingContent ? (
+          <div className="spinner" style={{ margin: '60px auto' }} />
+        ) : !full?.modules?.length ? (
+          <p className="ad-empty">No modules added to this course yet.</p>
+        ) : (
+          <div className="ad-modal-body">
+            {/* Left: video + lesson info */}
+            <div className="ad-modal-player">
+              {activeLesson?.videoUrl ? (
+                isYoutube ? (
+                  <iframe
+                    src={toEmbedUrl(activeLesson.videoUrl)}
+                    title={activeLesson.title}
+                    className="ad-video-frame"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  />
+                ) : (
+                  <video controls className="ad-video-frame" key={activeLesson._id}>
+                    <source src={activeLesson.videoUrl} />
+                    Your browser does not support video playback.
+                  </video>
+                )
+              ) : (
+                <div className="ad-no-video">
+                  <MdDescription size={40} style={{ color: '#9ca3af' }} />
+                  <p>No video for this lesson</p>
+                </div>
+              )}
+              <div className="ad-lesson-info">
+                <p className="ad-lesson-title">{activeLesson?.title}</p>
+                {activeLesson?.content && <p className="ad-lesson-content">{activeLesson.content}</p>}
+              </div>
+            </div>
+
+            {/* Right: module/lesson list */}
+            <div className="ad-modal-outline">
+              {full.modules.map((mod, mi) => (
+                <div key={mod._id || mi} className="ad-mod-group">
+                  <p className="ad-mod-title">Module {mi + 1}: {mod.title}</p>
+                  {mod.lessons?.map((lesson, li) => (
+                    <button
+                      key={lesson._id || li}
+                      className={`ad-lesson-btn${activeLesson?._id === lesson._id ? ' active' : ''}`}
+                      onClick={() => setActiveLesson(lesson)}
+                    >
+                      {lesson.videoUrl
+                        ? <MdPlayCircleFilled size={14} style={{ flexShrink: 0 }} />
+                        : <MdDescription size={14} style={{ flexShrink: 0 }} />
+                      }
+                      <span>{lesson.title}</span>
+                      {lesson.isFreePreview && <span className="ad-free-tag">Free</span>}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ════════════════════════════════════════════════════════════
    COURSES TAB
 ════════════════════════════════════════════════════════════ */
 const CoursesTab = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [inspecting, setInspecting] = useState(null);
   const del = useConfirm();
 
   useEffect(() => {
@@ -230,6 +337,7 @@ const CoursesTab = () => {
 
   return (
     <div className="ad-tab-content">
+      {inspecting && <CourseInspectorModal course={inspecting} onClose={() => setInspecting(null)} />}
       <div className="ad-filters">
         <div className="ad-search"><MdSearch className="ad-search-icon" /><input placeholder="Search by title or mentor…" value={search} onChange={e => setSearch(e.target.value)} /></div>
         <span className="ad-count">{courses.length} courses</span>
@@ -256,7 +364,12 @@ const CoursesTab = () => {
                   <td className="ad-muted">{c.level || '—'}</td>
                   <td><span className={`ad-badge ${c.isActive !== false ? 'ad-verified' : 'ad-pending'}`}>{c.isActive !== false ? 'Active' : 'Inactive'}</span></td>
                   <td className="ad-muted">{new Date(c.createdAt).toLocaleDateString()}</td>
-                  <td><DeleteBtn id={c._id} pending={del.pending} ask={del.ask} cancel={del.cancel} onConfirm={handleDelete} /></td>
+                  <td>
+                    <div className="ad-actions">
+                      <button className="ad-btn-icon" onClick={() => setInspecting(c)} title="Inspect content"><MdVisibility size={16} /></button>
+                      <DeleteBtn id={c._id} pending={del.pending} ask={del.ask} cancel={del.cancel} onConfirm={handleDelete} />
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
